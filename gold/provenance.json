@@ -1,6 +1,7 @@
 {
   "cases": [
     "average",
+    "bit_scan",
     "byte_perm",
     "double_as_longlong",
     "double_hi_lo",
@@ -10,12 +11,15 @@
     "graph_async_alloc",
     "graph_replay",
     "match_any",
+    "mul24",
     "mulhi",
     "packed_abs",
     "packed_add",
+    "packed_avg",
     "packed_cmp",
     "packed_minmax",
     "packed_sad",
+    "packed_set",
     "sad",
     "shared_atomic",
     "syncwarp",

@@ -48,6 +48,10 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `sad` | `__sad` / `__usad`, widened absolute difference plus a wrapping add | `sneg=2`, `smin=2147483648`, `smin1=2147483649`, `swrap=0`, `umax=4294967295`, `uwrap=0` |
 | `packed_sad` | sum of per-lane absolute differences, signed versus unsigned | `s2=2`, `u2=65536`, `smin=65536`, `pair=3`, `s4=131`, `u4=639` |
 | `packed_cmp` | per-lane comparison masks, signed versus unsigned | `eq=4294901760`, `ne=65535`, `gts=65535`, `gtu=4294967295`, `lts=4294901760`, `gts4=255` |
+| `packed_set` | per-lane predicates of 1, not an all-ones mask | `eq=65536`, `ne=1`, `gts=1`, `gtu=65537`, `gts4=1`, `gtu4=16777473` |
+| `packed_avg` | packed averages, round-half-away-from-zero versus truncation | `spos=131074`, `sneg=4294836221`, `smin=2147516416`, `uround=131074`, `uplain=65537`, `uhalf=2147516416` |
+| `bit_scan` | leading zeros, first set bit, population count, and bit reverse | `clz0=32`, `clzmin=0`, `ffs0=0`, `ffsmin=32`, `brev1=2147483648`, `clzll0=64`, `popc=32`, `brevll=9223372036854775808` |
+| `mul24` | 24-bit product, high byte ignored, low 32 bits kept | `hi=2`, `sign=-8388608`, `neg1=1`, `sq=0`, `usq=4261412865`, `uhi=16777216` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

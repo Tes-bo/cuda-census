@@ -1,0 +1,8 @@
+clz0=32
+clzmin=0
+ffs0=0
+ffsmin=32
+clzll0=64
+popc=32
+brev1=2147483648
+brevll=9223372036854775808

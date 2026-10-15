@@ -204,6 +204,56 @@
       }
     },
     {
+      "id": "packed_set",
+      "source": "corpus/packed_set/main.cu",
+      "expect": {
+        "eq": 65536,
+        "ne": 1,
+        "gts": 1,
+        "gtu": 65537,
+        "gts4": 1,
+        "gtu4": 16777473
+      }
+    },
+    {
+      "id": "packed_avg",
+      "source": "corpus/packed_avg/main.cu",
+      "expect": {
+        "spos": 131074,
+        "sneg": 4294836221,
+        "smin": 2147516416,
+        "uround": 131074,
+        "uplain": 65537,
+        "uhalf": 2147516416
+      }
+    },
+    {
+      "id": "bit_scan",
+      "source": "corpus/bit_scan/main.cu",
+      "expect": {
+        "clz0": 32,
+        "clzmin": 0,
+        "ffs0": 0,
+        "ffsmin": 32,
+        "brev1": 2147483648,
+        "clzll0": 64,
+        "popc": 32,
+        "brevll": 9223372036854775808
+      }
+    },
+    {
+      "id": "mul24",
+      "source": "corpus/mul24/main.cu",
+      "expect": {
+        "hi": 2,
+        "sign": -8388608,
+        "neg1": 1,
+        "sq": 0,
+        "usq": 4261412865,
+        "uhi": 16777216
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
