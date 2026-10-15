@@ -180,6 +180,18 @@
       }
     },
     {
+      "id": "packed_sad",
+      "source": "corpus/packed_sad/main.cu",
+      "expect": {
+        "s2": 2,
+        "u2": 65536,
+        "smin": 65536,
+        "pair": 3,
+        "s4": 131,
+        "u4": 639
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
