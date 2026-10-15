@@ -61,6 +61,17 @@
       "expect": {"bits": 1065353216}
     },
     {
+      "id": "funnelshift",
+      "source": "corpus/funnelshift/main.cu",
+      "expect": {
+        "l1": 2021161081,
+        "l32": 1010580540,
+        "lc32": 2779096485,
+        "r1": 1389548242,
+        "rc32": 1010580540
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
