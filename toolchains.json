@@ -1,0 +1,22 @@
+{
+  "nvcc": {
+    "role": "reference",
+    "compile": ["nvcc", "-O2", "-std=c++17", "-arch=native", "{source}", "-o", "{binary}"]
+  },
+  "hipify": {
+    "role": "vendor",
+    "translate": ["hipify-perl", "{source}"],
+    "translate_stdout": "{translated}",
+    "compile": ["hipcc", "-O2", "-std=c++17", "{translated}", "-o", "{binary}"]
+  },
+  "musify": {
+    "role": "vendor",
+    "copy_source_to": "{copied_source}",
+    "translate": ["musify-text", "--inplace", "--", "{copied_source}"],
+    "compile": ["mcc", "-O2", "-std=c++17", "{copied_source}", "-o", "{binary}", "-lmusart"]
+  },
+  "cu-bridge": {
+    "role": "vendor",
+    "compile": ["cucc", "-O2", "-std=c++17", "{source}", "-o", "{binary}"]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Tes-bo/cuda-census/schema/result.schema.json",
+  "title": "cuda-census case result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case",
+    "toolchain",
+    "status",
+    "argv",
+    "returncode",
+    "stdout_sha256",
+    "gold_sha256",
+    "keys",
+    "gold_keys",
+    "diffs",
+    "stderr_tail",
+    "seconds"
+  ],
+  "properties": {
+    "case": {"type": "string"},
+    "toolchain": {"type": "string", "enum": ["nvcc", "hipify", "musify", "cu-bridge"]},
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "compile-fail",
+        "run-fail",
+        "numeric-mismatch",
+        "gold-missing",
+        "toolchain-missing",
+        "unparsed-stdout"
+      ]
+    },
+    "argv": {"type": "array", "items": {"type": "string"}},
+    "returncode": {"type": ["integer", "null"]},
+    "stdout_sha256": {"type": ["string", "null"]},
+    "gold_sha256": {"type": ["string", "null"]},
+    "keys": {"type": ["object", "null"]},
+    "gold_keys": {"type": ["object", "null"]},
+    "diffs": {"type": "object"},
+    "stderr_tail": {"type": "string"},
+    "seconds": {"type": "number"}
+  }
+}

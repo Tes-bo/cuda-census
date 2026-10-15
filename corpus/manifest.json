@@ -1,0 +1,35 @@
+{
+  "gold_toolchain": "nvcc",
+  "cases": [
+    {
+      "id": "vector_add_int",
+      "source": "corpus/vector_add_int/main.cu",
+      "expect": {"sum": 8256}
+    },
+    {
+      "id": "warp_shuffle",
+      "source": "corpus/warp_shuffle/main.cu",
+      "expect": {"sum": 160}
+    },
+    {
+      "id": "shared_atomic",
+      "source": "corpus/shared_atomic/main.cu",
+      "expect": {"total": 128}
+    },
+    {
+      "id": "double_as_longlong",
+      "source": "corpus/double_as_longlong/main.cu",
+      "expect": {"bits": 4607182418800017408}
+    },
+    {
+      "id": "graph_replay",
+      "source": "corpus/graph_replay/main.cu",
+      "expect": {"sum": 32}
+    },
+    {
+      "id": "graph_async_alloc",
+      "source": "corpus/graph_async_alloc/main.cu",
+      "expect": {"sum": 32}
+    }
+  ]
+}

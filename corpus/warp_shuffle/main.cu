@@ -1,0 +1,43 @@
+// Copyright 2026 Tesbo
+// SPDX-License-Identifier: Apache-2.0
+
+#include <cstdio>
+#include <cuda_runtime.h>
+
+#define CHECK(cmd)                                                         \
+    do {                                                                   \
+        cudaError_t err_ = (cmd);                                          \
+        if (err_ != cudaSuccess) {                                         \
+            std::fprintf(stderr, "%s\n", cudaGetErrorString(err_));        \
+            return 1;                                                      \
+        }                                                                  \
+    } while (0)
+
+// Every lane reads the value that lane 5 held (the integer 5).
+__global__ void broadcast_lane(int* out) {
+    __shared__ int values[32];
+    int lane = threadIdx.x;
+    int got = __shfl_sync(0xffffffff, lane, 5);
+    values[lane] = got;
+    __syncthreads();
+    if (lane == 0) {
+        int sum = 0;
+        for (int i = 0; i < 32; ++i) {
+            sum += values[i];
+        }
+        *out = sum;
+    }
+}
+
+int main() {
+    int* out = nullptr;
+    CHECK(cudaMalloc(&out, sizeof(int)));
+    CHECK(cudaMemset(out, 0, sizeof(int)));
+    broadcast_lane<<<1, 32>>>(out);
+    CHECK(cudaDeviceSynchronize());
+    int sum = 0;
+    CHECK(cudaMemcpy(&sum, out, sizeof(int), cudaMemcpyDeviceToHost));
+    std::printf("sum=%d\n", sum);
+    cudaFree(out);
+    return 0;
+}
