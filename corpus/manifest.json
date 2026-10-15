@@ -12,6 +12,11 @@
       "expect": {"sum": 160}
     },
     {
+      "id": "warp_size",
+      "source": "corpus/warp_size/main.cu",
+      "expect": {"width": 32}
+    },
+    {
       "id": "shared_atomic",
       "source": "corpus/shared_atomic/main.cu",
       "expect": {"total": 128}
