@@ -4,6 +4,7 @@
     "float_as_int",
     "graph_async_alloc",
     "graph_replay",
+    "match_any",
     "shared_atomic",
     "vector_add_int",
     "warp_shuffle",

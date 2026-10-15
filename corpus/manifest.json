@@ -17,6 +17,11 @@
       "expect": {"width": 32}
     },
     {
+      "id": "match_any",
+      "source": "corpus/match_any/main.cu",
+      "expect": {"lane0": 1, "lane32": 1, "all": 0, "pred": 0}
+    },
+    {
       "id": "shared_atomic",
       "source": "corpus/shared_atomic/main.cu",
       "expect": {"total": 128}
