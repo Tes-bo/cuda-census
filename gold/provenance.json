@@ -12,6 +12,7 @@
     "funnelshift",
     "graph_async_alloc",
     "graph_replay",
+    "half_cvt",
     "match_any",
     "mul24",
     "mulhi",
