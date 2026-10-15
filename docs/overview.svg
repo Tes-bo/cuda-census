@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="300" viewBox="0 0 820 300" role="img">
+  <title>cuda-census: one corpus, official toolchains, nvcc gold</title>
+  <desc>The same CUDA cases are compiled by nvcc, hipify, musify, and cu-bridge. Vendor stdout is diffed against nvcc gold.</desc>
+  <rect width="820" height="300" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+  <rect x="20" y="78" width="168" height="144" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text x="104" y="132" text-anchor="middle" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">corpus</text>
+  <text x="104" y="156" text-anchor="middle" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">same CUDA source</text>
+  <text x="104" y="178" text-anchor="middle" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">31 cases</text>
+  <line x1="188" y1="150" x2="214" y2="150" stroke="#656d76" stroke-width="1.5"/>
+  <line x1="214" y1="46" x2="214" y2="254" stroke="#656d76" stroke-width="1.5"/>
+  <line x1="214" y1="46" x2="248" y2="46" stroke="#656d76" stroke-width="1.5"/>
+  <line x1="214" y1="116" x2="248" y2="116" stroke="#656d76" stroke-width="1.5"/>
+  <line x1="214" y1="186" x2="248" y2="186" stroke="#656d76" stroke-width="1.5"/>
+  <line x1="214" y1="254" x2="248" y2="254" stroke="#656d76" stroke-width="1.5"/>
+  <polygon points="248,46 240,42 240,50" fill="#656d76"/>
+  <polygon points="248,116 240,112 240,120" fill="#656d76"/>
+  <polygon points="248,186 240,182 240,190" fill="#656d76"/>
+  <polygon points="248,254 240,250 240,258" fill="#656d76"/>
+  <rect x="256" y="16" width="544" height="60" rx="8" fill="#dafbe1" stroke="#1a7f37"/>
+  <text x="276" y="40" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">nvcc</text>
+  <text x="276" y="60" fill="#1a7f37" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">writes gold/*.stdout. The only gold.</text>
+  <rect x="256" y="86" width="544" height="60" rx="8" fill="#fff8c5" stroke="#d4a72c"/>
+  <text x="276" y="110" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">hipify-perl, then hipcc</text>
+  <text x="276" y="130" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">AMD and Hygon. Diff the integers against gold.</text>
+  <rect x="256" y="156" width="544" height="60" rx="8" fill="#ddf4ff" stroke="#54aeff"/>
+  <text x="276" y="180" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">musify-text, then mcc</text>
+  <text x="276" y="200" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">Moore Threads. Diff the integers against gold.</text>
+  <rect x="256" y="226" width="544" height="58" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text x="276" y="250" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">cucc</text>
+  <text x="276" y="270" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">MetaX. Compiles the original .cu, then the same diff.</text>
+</svg>

@@ -1,28 +1,59 @@
 # cuda-census
 
-Same CUDA source on vendor toolchains: compile, run, and numeric diff for HIP (AMD, Hygon), MUSA (musify), and MACA (cu-bridge). Official tools only.
+The same CUDA source, compiled and run by each vendor's own tools, then diffed against `nvcc`. This repository is not a converter.
 
-This repository records what happens when one corpus is built with the toolchain that vendor ships. It is not a converter, and it does not call [cuda-retarget](https://github.com/Tes-bo/cuda-retarget). A green cell means that vendor's own tool compiled the case, ran it, and printed the same integers as the committed `nvcc` stdout.
+[![License](https://img.shields.io/github/license/Tes-bo/cuda-census?style=flat-square&color=blue)](LICENSE)
+[![Gold](https://img.shields.io/badge/gold-nvcc%20stdout-1a7f37?style=flat-square)](gold/provenance.json)
+[![Toolchains](https://img.shields.io/badge/toolchains-official%20only-0969da?style=flat-square)](toolchains.json)
 
-cuda-census is not affiliated with NVIDIA, AMD, Hygon, Moore Threads, or MetaX. CUDA names the source language of the corpus. The vendor names above name the official tools under test.
+[cuda-retarget](https://github.com/Tes-bo/cuda-retarget) is a separate rewriter. It is not a column in this table. A path whose name is `cuda-retarget` is refused.
 
-## What is recorded
+<p align="center">
+  <img src="docs/overview.svg" alt="One CUDA corpus is compiled by nvcc, hipify, musify, and cu-bridge. Vendor integers are diffed against nvcc gold." width="820">
+</p>
 
-Each case prints `name=integer` lines on stdout and nothing else. The runner writes `results/<toolchain>/<case>.json` with one of these statuses:
+**Quick start · [Statuses](#statuses) · [Corpus](#corpus) · [Run](#run)**
+
+A green cell means that vendor's tool compiled the case, ran it, and printed the same integers as the committed `nvcc` stdout. Vendor results are not compared with each other.
+
+cuda-census is not affiliated with NVIDIA, AMD, Hygon, Moore Threads, or MetaX. CUDA names the source language. The vendor names name the official tools under test.
+
+## Quick start
+
+Python 3.10 or newer.
+
+```bash
+python3 -m census self-check
+python3 -m census list
+python3 -m census run --toolchain nvcc
+python3 -m census run --toolchain hipify
+python3 -m census run --toolchain musify
+python3 -m census run --toolchain cu-bridge
+```
+
+`run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1.
+
+Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<case>.json`. `results/` is not committed.
+
+## Statuses
 
 | Status | Meaning |
 | --- | --- |
 | `pass` | The program ran and its integers match `gold/<case>.stdout`. |
-| `numeric-mismatch` | The program ran and at least one integer differs from gold. |
+| `numeric-mismatch` | The program ran and at least one integer differs from gold. The diff is actual minus gold. |
 | `compile-fail` | Translate or compile returned non-zero. |
 | `run-fail` | The binary returned non-zero. |
 | `unparsed-stdout` | Stdout was not a set of `name=integer` lines. |
 | `gold-missing` | A vendor toolchain ran, but `gold/` has no `nvcc` stdout for that case. |
 | `toolchain-missing` | The official tool is not on `PATH`. |
 
-`gold/` is produced only by `nvcc`. Vendor toolchains are compared with that file. They are not compared with each other, and `--write-gold` is rejected for every toolchain except `nvcc`.
+`gold/` is produced only by `nvcc`. `--write-gold` is rejected for every other toolchain.
+
+The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 12.0, V12.0.140`) on a Tesla V100-SXM2-32GB. `gold/provenance.json` records that run. HIPIFY, musify, and cu-bridge are wired in `toolchains.json` and were not executed in this tree, because those tools are not installed here. A machine that has them should run the same command and publish the JSON.
 
 ## Corpus
+
+31 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -58,20 +89,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 
-The committed gold files were produced by `nvcc` from CUDA 12.0 on a Tesla V100-SXM2-32GB. `gold/provenance.json` records that run. HIPIFY, musify, and cu-bridge are wired in `toolchains.json` and were not executed in this tree, because those tools are not installed here. A machine that has them should run the same command and publish the JSON.
-
 ## Run
-
-```bash
-python3 -m census self-check
-python3 -m census list
-python3 -m census run --toolchain nvcc
-python3 -m census run --toolchain hipify
-python3 -m census run --toolchain musify
-python3 -m census run --toolchain cu-bridge
-```
-
-`run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1.
 
 Regenerate gold only from a real `nvcc` run, and only when the printed integers still match `corpus/manifest.json`:
 
@@ -85,16 +103,18 @@ Host-side tests, with no GPU:
 python3 -m unittest discover -s tests -v
 ```
 
-## Toolchain command lines
+### Toolchain command lines
 
 `toolchains.json` is the command line that will be executed. No other translator is consulted.
 
-- `nvcc` compiles the corpus file.
-- `hipify` runs `hipify-perl` and compiles the translated file with `hipcc`. On a Hygon machine, `hipcc` is the DTK compiler on `PATH`.
-- `musify` copies the file, runs `musify-text --inplace`, and compiles with `mcc`.
-- `cu-bridge` does not rewrite source. `cucc` compiles the original `.cu`.
+| Toolchain | What runs |
+| --- | --- |
+| `nvcc` | compiles the corpus file |
+| `hipify` | `hipify-perl`, then `hipcc`. On a Hygon machine, `hipcc` is the DTK compiler on `PATH` |
+| `musify` | copy the file, `musify-text --inplace`, then `mcc` |
+| `cu-bridge` | no rewrite. `cucc` compiles the original `.cu` |
 
-Override a binary by putting the official tool on `PATH`. A path whose name is `cuda-retarget` is refused.
+Override a binary by putting the official tool on `PATH`.
 
 ## Adding a case
 
