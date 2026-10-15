@@ -44,6 +44,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `packed_abs` | per-lane abs, negation, and signed versus unsigned absolute difference | `abs2=2147483650`, `absss2=2147418114`, `neg2=2147549182`, `negss2=2147549182`, `negss4=2147451263`, `diffs2=2147483650`, `diffu2=2147549182` |
 | `byte_perm` | `__byte_perm` byte select; high selector bits are ignored | `id=2712847316`, `fromy=523124044`, `high=523124044`, `nibble=3569595041`, `zero=3570717908` |
 | `average` | `__hadd` / `__rhadd` / `__uhadd`, rounding and overflow | `h12=1`, `r12=2`, `hneg=-3`, `rneg=-2`, `hmin=-2147483648`, `uhwrap=2147483648` |
+| `mulhi` | high half of a signed or unsigned product, 32-bit and 64-bit | `min1=-1`, `minneg=0`, `minsq=1073741824`, `umax=4294967294`, `neg64=-1`, `sq64=4611686018427387904`, `umax64=18446744073709551614` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

@@ -155,6 +155,19 @@
       }
     },
     {
+      "id": "mulhi",
+      "source": "corpus/mulhi/main.cu",
+      "expect": {
+        "min1": -1,
+        "minneg": 0,
+        "minsq": 1073741824,
+        "umax": 4294967294,
+        "neg64": -1,
+        "sq64": 4611686018427387904,
+        "umax64": 18446744073709551614
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

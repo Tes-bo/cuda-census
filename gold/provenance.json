@@ -10,6 +10,7 @@
     "graph_async_alloc",
     "graph_replay",
     "match_any",
+    "mulhi",
     "packed_abs",
     "packed_add",
     "packed_minmax",
