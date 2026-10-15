@@ -14,6 +14,7 @@
     "packed_abs",
     "packed_add",
     "packed_minmax",
+    "sad",
     "shared_atomic",
     "syncwarp",
     "vector_add_int",
