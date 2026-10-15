@@ -143,6 +143,18 @@
       }
     },
     {
+      "id": "average",
+      "source": "corpus/average/main.cu",
+      "expect": {
+        "h12": 1,
+        "r12": 2,
+        "hneg": -3,
+        "rneg": -2,
+        "hmin": -2147483648,
+        "uhwrap": 2147483648
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

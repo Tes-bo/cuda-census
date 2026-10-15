@@ -1,5 +1,6 @@
 {
   "cases": [
+    "average",
     "byte_perm",
     "double_as_longlong",
     "double_hi_lo",
