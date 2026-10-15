@@ -22,6 +22,20 @@
       "expect": {"lane0": 1, "lane32": 1, "all": 0, "pred": 0}
     },
     {
+      "id": "warp_vote",
+      "source": "corpus/warp_vote/main.cu",
+      "expect": {
+        "lane0": 4294967295,
+        "any0": 1,
+        "all0": 1,
+        "uni0": 1,
+        "lane32": 0,
+        "any32": 0,
+        "all32": 0,
+        "uni32": 1
+      }
+    },
+    {
       "id": "shared_atomic",
       "source": "corpus/shared_atomic/main.cu",
       "expect": {"total": 128}

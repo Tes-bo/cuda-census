@@ -30,6 +30,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `warp_shuffle` | `__shfl_sync` across one warp | `sum=160` |
 | `warp_size` | the `warpSize` builtin | `width=32` |
 | `match_any` | `__match_any_sync` / `__match_all_sync` across two warps | `lane0=1`, `lane32=1`, `all=0`, `pred=0` |
+| `warp_vote` | `__ballot_sync`, `__any_sync`, `__all_sync`, `__uni_sync` across two warps | `lane0=4294967295`, `any0=1`, `all0=1`, `uni0=1`, `lane32=0`, `any32=0`, `all32=0`, `uni32=1` |
 | `shared_atomic` | `atomicAdd` on shared memory | `total=128` |
 | `double_as_longlong` | `__double_as_longlong(1.0)` | `bits=4607182418800017408` |
 | `float_as_int` | `__float_as_int(1.0f)` | `bits=1065353216` |
