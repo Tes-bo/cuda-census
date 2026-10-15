@@ -77,6 +77,11 @@
       }
     },
     {
+      "id": "dp4a",
+      "source": "corpus/dp4a/main.cu",
+      "expect": {"ones": 4, "s": 2, "s80": -512, "u": 258, "u80": 512}
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

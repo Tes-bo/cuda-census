@@ -2,6 +2,7 @@
   "cases": [
     "double_as_longlong",
     "double_hi_lo",
+    "dp4a",
     "float_as_int",
     "funnelshift",
     "graph_async_alloc",
