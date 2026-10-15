@@ -300,6 +300,29 @@
       }
     },
     {
+      "id": "farith",
+      "source": "corpus/farith/main.cu",
+      "expect": {
+        "addtiny": 1065353216,
+        "addru": 1065353217,
+        "addrdn": 3212836865,
+        "addtie": 1065353216,
+        "addtieru": 1065353217,
+        "addinf": 2139095040,
+        "addmax": 2139095039,
+        "zrd": 2147483648,
+        "zsame": 0,
+        "nan": 2147483647,
+        "subrd": 1065353215,
+        "mulrz": 2139095039,
+        "mulrd": 4286578688,
+        "mzero": 2147483648,
+        "fmaru": 1065353217,
+        "fmacancel": 679477248,
+        "fmanan": 2147483647
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
