@@ -8,6 +8,7 @@
     "graph_async_alloc",
     "graph_replay",
     "match_any",
+    "packed_abs",
     "packed_add",
     "packed_minmax",
     "shared_atomic",
