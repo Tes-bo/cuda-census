@@ -36,6 +36,16 @@
       }
     },
     {
+      "id": "warp_reduce",
+      "source": "corpus/warp_reduce/main.cu",
+      "expect": {"lane0": 496, "lane32": 1520}
+    },
+    {
+      "id": "syncwarp",
+      "source": "corpus/syncwarp/main.cu",
+      "expect": {"sum": 496}
+    },
+    {
       "id": "shared_atomic",
       "source": "corpus/shared_atomic/main.cu",
       "expect": {"total": 128}

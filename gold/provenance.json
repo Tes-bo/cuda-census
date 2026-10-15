@@ -6,7 +6,9 @@
     "graph_replay",
     "match_any",
     "shared_atomic",
+    "syncwarp",
     "vector_add_int",
+    "warp_reduce",
     "warp_shuffle",
     "warp_size",
     "warp_vote"
