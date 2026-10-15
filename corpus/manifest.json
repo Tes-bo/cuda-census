@@ -254,6 +254,52 @@
       }
     },
     {
+      "id": "round_cvt",
+      "source": "corpus/round_cvt/main.cu",
+      "expect": {
+        "rn25": 2,
+        "ru25": 3,
+        "rdn": -3,
+        "big": 2147483647,
+        "nbig": -2147483648,
+        "nan": 0,
+        "uneg": 0,
+        "ubig": 4294967295,
+        "uru": 1,
+        "up": 1266679809,
+        "nrd": 3414163458,
+        "imaxrd": 1325400063,
+        "urd": 1333788671
+      }
+    },
+    {
+      "id": "round_wide",
+      "source": "corpus/round_wide/main.cu",
+      "expect": {
+        "llnan": -9223372036854775808,
+        "llbig": 9223372036854775807,
+        "ullnan": 9223372036854775808,
+        "llrn": 1509949440,
+        "llru": 1509949441,
+        "ullrd": 1602224127,
+        "dnan": -2147483648,
+        "dtrunc": 1,
+        "dun": 2147483648,
+        "dull": 18446744073709551615
+      }
+    },
+    {
+      "id": "saturatef",
+      "source": "corpus/saturatef/main.cu",
+      "expect": {
+        "neg": 0,
+        "two": 1065353216,
+        "half": 1056964608,
+        "mzero": 0,
+        "nan": 0
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
