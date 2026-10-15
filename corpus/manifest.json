@@ -56,6 +56,11 @@
       "expect": {"bits": 4607182418800017408}
     },
     {
+      "id": "double_hi_lo",
+      "source": "corpus/double_hi_lo/main.cu",
+      "expect": {"hi": 1072693248, "lo": 0, "round": 1}
+    },
+    {
       "id": "float_as_int",
       "source": "corpus/float_as_int/main.cu",
       "expect": {"bits": 1065353216}

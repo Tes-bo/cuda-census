@@ -35,6 +35,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `syncwarp` | no-argument `__syncwarp()` then a shared-memory sum | `sum=496` |
 | `shared_atomic` | `atomicAdd` on shared memory | `total=128` |
 | `double_as_longlong` | `__double_as_longlong(1.0)` | `bits=4607182418800017408` |
+| `double_hi_lo` | `__double2hiint` / `__double2loint` / `__hiloint2double` of 1.0 | `hi=1072693248`, `lo=0`, `round=1` |
 | `float_as_int` | `__float_as_int(1.0f)` | `bits=1065353216` |
 | `funnelshift` | `__funnelshift_l` / `_lc` / `_r` / `_rc` wrap versus clamp | `l1=2021161081`, `l32=1010580540`, `lc32=2779096485`, `r1=1389548242`, `rc32=1010580540` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
