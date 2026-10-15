@@ -6,6 +6,7 @@
     "double_as_longlong",
     "double_hi_lo",
     "dp4a",
+    "dround",
     "farith",
     "float_as_int",
     "funnelshift",

@@ -323,6 +323,30 @@
       }
     },
     {
+      "id": "dround",
+      "source": "corpus/dround/main.cu",
+      "expect": {
+        "ftie": 1065353216,
+        "ftru": 1065353217,
+        "ftrd": 3212836865,
+        "fsub": 0,
+        "fsubru": 1,
+        "fmax": 2139095039,
+        "finf": 2139095040,
+        "fnan": 4290772992,
+        "fmzero": 2147483648,
+        "fru": 1266679809,
+        "irn": 2,
+        "iru": 3,
+        "ird": -3,
+        "inan": -2147483648,
+        "uru": 2,
+        "llru": 9223372036854775807,
+        "llrd": -9223372036854775808,
+        "ullnan": 9223372036854775808
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
