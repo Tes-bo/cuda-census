@@ -82,6 +82,24 @@
       "expect": {"ones": 4, "s": 2, "s80": -512, "u": 258, "u80": 512}
     },
     {
+      "id": "packed_add",
+      "source": "corpus/packed_add/main.cu",
+      "expect": {
+        "add2": 2147483648,
+        "addss2": 2147418112,
+        "addus2": 2147549183,
+        "sub2": 2147483647,
+        "subss2": 2147549183,
+        "subus2": 2147418112,
+        "add4": 2147647744,
+        "addss4": 2130870528,
+        "addus4": 2147647999,
+        "sub4": 2130739199,
+        "subss4": 2147516671,
+        "subus4": 2130738944
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
