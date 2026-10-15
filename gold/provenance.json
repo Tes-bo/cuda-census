@@ -1,5 +1,6 @@
 {
   "cases": [
+    "byte_perm",
     "double_as_longlong",
     "double_hi_lo",
     "dp4a",

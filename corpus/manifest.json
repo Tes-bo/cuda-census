@@ -132,6 +132,17 @@
       }
     },
     {
+      "id": "byte_perm",
+      "source": "corpus/byte_perm/main.cu",
+      "expect": {
+        "id": 2712847316,
+        "fromy": 523124044,
+        "high": 523124044,
+        "nibble": 3569595041,
+        "zero": 3570717908
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
