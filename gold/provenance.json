@@ -13,6 +13,7 @@
     "mulhi",
     "packed_abs",
     "packed_add",
+    "packed_cmp",
     "packed_minmax",
     "packed_sad",
     "sad",

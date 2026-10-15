@@ -47,6 +47,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `mulhi` | high half of a signed or unsigned product, 32-bit and 64-bit | `min1=-1`, `minneg=0`, `minsq=1073741824`, `umax=4294967294`, `neg64=-1`, `sq64=4611686018427387904`, `umax64=18446744073709551614` |
 | `sad` | `__sad` / `__usad`, widened absolute difference plus a wrapping add | `sneg=2`, `smin=2147483648`, `smin1=2147483649`, `swrap=0`, `umax=4294967295`, `uwrap=0` |
 | `packed_sad` | sum of per-lane absolute differences, signed versus unsigned | `s2=2`, `u2=65536`, `smin=65536`, `pair=3`, `s4=131`, `u4=639` |
+| `packed_cmp` | per-lane comparison masks, signed versus unsigned | `eq=4294901760`, `ne=65535`, `gts=65535`, `gtu=4294967295`, `lts=4294901760`, `gts4=255` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

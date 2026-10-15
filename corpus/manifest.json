@@ -192,6 +192,18 @@
       }
     },
     {
+      "id": "packed_cmp",
+      "source": "corpus/packed_cmp/main.cu",
+      "expect": {
+        "eq": 4294901760,
+        "ne": 65535,
+        "gts": 65535,
+        "gtu": 4294967295,
+        "lts": 4294901760,
+        "gts4": 255
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
