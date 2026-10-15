@@ -13,6 +13,7 @@
     "graph_async_alloc",
     "graph_replay",
     "half_cvt",
+    "half_wide",
     "match_any",
     "mul24",
     "mulhi",
