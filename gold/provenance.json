@@ -9,6 +9,7 @@
     "graph_replay",
     "match_any",
     "packed_add",
+    "packed_minmax",
     "shared_atomic",
     "syncwarp",
     "vector_add_int",

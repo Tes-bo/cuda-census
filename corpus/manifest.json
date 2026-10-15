@@ -100,6 +100,20 @@
       }
     },
     {
+      "id": "packed_minmax",
+      "source": "corpus/packed_minmax/main.cu",
+      "expect": {
+        "mins2": 2147483648,
+        "minu2": 2147418112,
+        "maxs2": 2147418113,
+        "maxu2": 2147483649,
+        "mins4": 2147581952,
+        "minu4": 2130804480,
+        "maxs4": 2130804607,
+        "maxu4": 2147582079
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
