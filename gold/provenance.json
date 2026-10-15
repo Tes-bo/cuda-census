@@ -1,6 +1,7 @@
 {
   "cases": [
     "double_as_longlong",
+    "float_as_int",
     "graph_async_alloc",
     "graph_replay",
     "shared_atomic",

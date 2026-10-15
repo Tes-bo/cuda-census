@@ -31,6 +31,7 @@ Each case prints `name=integer` lines on stdout and nothing else. The runner wri
 | `warp_size` | the `warpSize` builtin | `width=32` |
 | `shared_atomic` | `atomicAdd` on shared memory | `total=128` |
 | `double_as_longlong` | `__double_as_longlong(1.0)` | `bits=4607182418800017408` |
+| `float_as_int` | `__float_as_int(1.0f)` | `bits=1065353216` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

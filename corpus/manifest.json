@@ -27,6 +27,11 @@
       "expect": {"bits": 4607182418800017408}
     },
     {
+      "id": "float_as_int",
+      "source": "corpus/float_as_int/main.cu",
+      "expect": {"bits": 1065353216}
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
