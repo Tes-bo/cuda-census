@@ -479,6 +479,32 @@
       }
     },
     {
+      "id": "hcmp",
+      "source": "corpus/hcmp/main.cu",
+      "expect": {
+        "eqpm": 1,
+        "nenan": 0,
+        "equnan": 1,
+        "ltunan": 1,
+        "gtunan": 1,
+        "isnan": 1,
+        "neg0": 32768,
+        "negnan": 32767,
+        "absnn": 32767,
+        "eq2": 15360,
+        "equ2": 1006648320,
+        "eqmask": 65535,
+        "nemask": 4294901760,
+        "beqone": 0,
+        "maxnum": 15360,
+        "max0": 0,
+        "min0": 32768,
+        "maxboth": 2147450879,
+        "minzero": 2147499008,
+        "neg2": 2147450880
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

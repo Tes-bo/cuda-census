@@ -5,7 +5,7 @@
   <rect x="20" y="78" width="168" height="144" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
   <text x="104" y="132" text-anchor="middle" fill="#1f2328" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="16" font-weight="600">corpus</text>
   <text x="104" y="156" text-anchor="middle" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">same CUDA source</text>
-  <text x="104" y="178" text-anchor="middle" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">38 cases</text>
+  <text x="104" y="178" text-anchor="middle" fill="#656d76" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">39 cases</text>
   <line x1="188" y1="150" x2="214" y2="150" stroke="#656d76" stroke-width="1.5"/>
   <line x1="214" y1="46" x2="214" y2="254" stroke="#656d76" stroke-width="1.5"/>
   <line x1="214" y1="46" x2="248" y2="46" stroke="#656d76" stroke-width="1.5"/>

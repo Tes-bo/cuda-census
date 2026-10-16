@@ -17,6 +17,7 @@
     "half_int",
     "half_wide",
     "harith",
+    "hcmp",
     "match_any",
     "mul24",
     "mulhi",
