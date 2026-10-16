@@ -53,7 +53,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-39 cases. The gold column is the `nvcc` stdout.
+40 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -94,6 +94,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `harith` | half add, multiply, fused multiply-add, and saturate | `zpn=0`, `znn=32768`, `nan=32767`, `overflow=31744`, `cancel=0`, `residual=16`, `sat3=15360`, `satnan=0` |
 | `half2` | packed half2 lanes, the low lane in the low 16 bits | `nanlo=1073774591`, `residual=16`, `cancel=0`, `split=2080390144`, `satnan=1006632960` |
 | `hcmp` | half ordered and unordered compares, max, and sign | `nenan=0`, `equnan=1`, `eq2=15360`, `eqmask=65535`, `min0=32768`, `negnan=32767` |
+| `darith` | directed double add, sub, mul, and fused multiply-add | `zrd=9223372036854775808`, `addmax=9218868437227405311`, `nan2=9221120237041090562`, `mulnan=18444492273895866368`, `residual=4138808057553485824`, `subtie=4607182418800017407` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 
