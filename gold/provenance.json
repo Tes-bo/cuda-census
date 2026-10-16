@@ -11,6 +11,7 @@
     "farith",
     "fdiv",
     "float_as_int",
+    "fminmax",
     "funnelshift",
     "graph_async_alloc",
     "graph_replay",
