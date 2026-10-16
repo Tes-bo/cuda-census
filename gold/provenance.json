@@ -9,6 +9,7 @@
     "dp4a",
     "dround",
     "farith",
+    "fdiv",
     "float_as_int",
     "funnelshift",
     "graph_async_alloc",

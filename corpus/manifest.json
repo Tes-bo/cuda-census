@@ -530,6 +530,32 @@
       }
     },
     {
+      "id": "fdiv",
+      "source": "corpus/fdiv/main.cu",
+      "expect": {
+        "divnan": 2147483647,
+        "divinf": 2139095040,
+        "divninf": 4286578688,
+        "mzero": 2147483648,
+        "zeroinf": 0,
+        "sqrtm0": 2147483648,
+        "sqrtneg": 2147483647,
+        "sq2": 1068827891,
+        "sq2ru": 1068827892,
+        "d3": 1051372203,
+        "d3rz": 1051372202,
+        "underrn": 0,
+        "underru": 1,
+        "ovrd": 2139095039,
+        "rsqrt": 1392508928,
+        "split": 1392508929,
+        "rs0": 2139095040,
+        "rsm0": 4286578688,
+        "sqsub": 439682291,
+        "sqsubru": 439682292
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
