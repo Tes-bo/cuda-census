@@ -427,6 +427,32 @@
       }
     },
     {
+      "id": "harith",
+      "source": "corpus/harith/main.cu",
+      "expect": {
+        "zpn": 0,
+        "znn": 32768,
+        "zrn": 0,
+        "mzero": 32768,
+        "mpos": 0,
+        "nan": 32767,
+        "nnan": 32767,
+        "infsub": 32767,
+        "inf0": 32767,
+        "overflow": 31744,
+        "subm0": 32768,
+        "prod": 15362,
+        "cancel": 0,
+        "residual": 16,
+        "sat3": 15360,
+        "satneg": 0,
+        "satnan": 0,
+        "satm0": 0,
+        "satinf": 15360,
+        "fmasat": 6144
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

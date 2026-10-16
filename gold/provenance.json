@@ -15,6 +15,7 @@
     "half_cvt",
     "half_int",
     "half_wide",
+    "harith",
     "match_any",
     "mul24",
     "mulhi",
