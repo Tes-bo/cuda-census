@@ -53,7 +53,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-42 cases. The gold column is the `nvcc` stdout.
+43 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -95,6 +95,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `half2` | packed half2 lanes, the low lane in the low 16 bits | `nanlo=1073774591`, `residual=16`, `cancel=0`, `split=2080390144`, `satnan=1006632960` |
 | `hcmp` | half ordered and unordered compares, max, and sign | `nenan=0`, `equnan=1`, `eq2=15360`, `eqmask=65535`, `min0=32768`, `negnan=32767` |
 | `darith` | directed double add, sub, mul, and fused multiply-add | `zrd=9223372036854775808`, `addmax=9218868437227405311`, `nan2=9221120237041090562`, `mulnan=18444492273895866368`, `residual=4138808057553485824`, `subtie=4607182418800017407` |
+| `ddiv` | directed double division, reciprocal, and square root | `dnan0=18444492273895866368`, `dnan2=9221120237041090565`, `d3ru=4599676419421066582`, `dunru=1`, `dovrd=9218868437227405311`, `ds2rd=4609047870845172684`, `rsubrz=9218868437227405311` |
 | `fdiv` | directed float division, reciprocal, square root, and reciprocal square root | `divnan=2147483647`, `sq2ru=1068827892`, `d3rz=1051372202`, `underru=1`, `ovrd=2139095039`, `rsqrt=1392508928`, `split=1392508929` |
 | `fminmax` | min, max, nextafter, and copysign | `minzm=2147483648`, `maxzm=0`, `minnan=2147483647`, `nxtzm=2147483648`, `copynan=4290772993`, `dminnan=9221120237041090565`, `dnxtone=9221120237041090561` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
