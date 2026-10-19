@@ -53,7 +53,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-43 cases. The gold column is the `nvcc` stdout.
+44 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -98,6 +98,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `ddiv` | directed double division, reciprocal, and square root | `dnan0=18444492273895866368`, `dnan2=9221120237041090565`, `d3ru=4599676419421066582`, `dunru=1`, `dovrd=9218868437227405311`, `ds2rd=4609047870845172684`, `rsubrz=9218868437227405311` |
 | `fdiv` | directed float division, reciprocal, square root, and reciprocal square root | `divnan=2147483647`, `sq2ru=1068827892`, `d3rz=1051372202`, `underru=1`, `ovrd=2139095039`, `rsqrt=1392508928`, `split=1392508929` |
 | `fminmax` | min, max, nextafter, and copysign | `minzm=2147483648`, `maxzm=0`, `minnan=2147483647`, `nxtzm=2147483648`, `copynan=4290772993`, `dminnan=9221120237041090565`, `dnxtone=9221120237041090561` |
+| `ptx` | inline `lop3.b32`, `bfe`, `bfi`, and `prmt.b32` | `lop=2273806215`, `lopz=0`, `sbit=4294967295`, `spos=4294967295`, `s0=0`, `psign=16843008`, `pbyte=16843009` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

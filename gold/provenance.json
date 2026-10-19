@@ -32,6 +32,7 @@
     "packed_minmax",
     "packed_sad",
     "packed_set",
+    "ptx",
     "round_cvt",
     "round_wide",
     "sad",
