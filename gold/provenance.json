@@ -13,6 +13,7 @@
     "fdiv",
     "float_as_int",
     "fminmax",
+    "fround",
     "funnelshift",
     "graph_async_alloc",
     "graph_replay",
