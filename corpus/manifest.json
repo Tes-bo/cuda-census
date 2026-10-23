@@ -897,6 +897,21 @@
       }
     },
     {
+      "id": "dp2a",
+      "source": "corpus/dp2a/main.cu",
+      "expect": {
+        "slo": 4194176,
+        "ulo": 4194432,
+        "shi": 4194176,
+        "uhi": 4194432,
+        "zlo": 0,
+        "sff": -1,
+        "uff": 255,
+        "hiff": 0,
+        "wrap": -2147483647
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

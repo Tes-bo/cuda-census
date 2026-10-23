@@ -8,6 +8,7 @@
     "ddiv",
     "double_as_longlong",
     "double_hi_lo",
+    "dp2a",
     "dp4a",
     "dround",
     "farith",
