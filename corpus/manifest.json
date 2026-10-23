@@ -756,6 +756,22 @@
       }
     },
     {
+      "id": "hypot",
+      "source": "corpus/hypot/main.cu",
+      "expect": {
+        "infnan": 2139095040,
+        "nann": 2147483647,
+        "zz": 0,
+        "big": 1605698803,
+        "naive": 2139095040,
+        "m1": 1065353216,
+        "one": 1068827891,
+        "n3": 2139095040,
+        "n4": 1610612736,
+        "n3one": 1071494103
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
