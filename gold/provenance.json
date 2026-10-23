@@ -14,6 +14,7 @@
     "float_as_int",
     "fminmax",
     "fround",
+    "fsplit",
     "funnelshift",
     "graph_async_alloc",
     "graph_replay",
