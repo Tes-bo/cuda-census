@@ -912,6 +912,27 @@
       }
     },
     {
+      "id": "fns",
+      "source": "corpus/fns/main.cu",
+      "expect": {
+        "none": 4294967295,
+        "zbit": 0,
+        "clear": 4294967295,
+        "up": 1,
+        "down": 1,
+        "self": 2,
+        "nth": 3,
+        "past": 4294967295,
+        "msb": 31,
+        "bhi": 4294967295,
+        "top": 31,
+        "bot": 0,
+        "over": 4294967295,
+        "imin": 0,
+        "imin0": 0
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

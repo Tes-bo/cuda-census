@@ -15,6 +15,7 @@
     "fdiv",
     "float_as_int",
     "fminmax",
+    "fns",
     "fpred",
     "fround",
     "fsplit",
