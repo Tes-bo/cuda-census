@@ -868,6 +868,35 @@
       }
     },
     {
+      "id": "fpred",
+      "source": "corpus/fpred/main.cu",
+      "expect": {
+        "sb0": 0,
+        "sbm": 1,
+        "sbn": 1,
+        "sbp": 0,
+        "sbi": 1,
+        "nnan": 1,
+        "nsig": 1,
+        "ninf": 0,
+        "iinf": 1,
+        "ininf": 1,
+        "inan": 0,
+        "fsub": 1,
+        "finf": 0,
+        "fnan": 0,
+        "fm0": 1,
+        "dsbm": 1,
+        "dsbn": 1,
+        "dnsig": 1,
+        "dnnsig": 1,
+        "dinf": 1,
+        "dnan": 0,
+        "dfsub": 1,
+        "dfnan": 0
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
