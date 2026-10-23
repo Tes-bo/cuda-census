@@ -49,6 +49,7 @@
     "saturatef",
     "scale",
     "shared_atomic",
+    "sqrt",
     "syncwarp",
     "vector_add_int",
     "warp_reduce",

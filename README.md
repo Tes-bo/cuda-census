@@ -53,7 +53,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-55 cases. The gold column is the `nvcc` stdout.
+56 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -110,6 +110,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `fpred` | `signbit`, `isnan`, `isinf`, and `isfinite` | `sb0=0`, `sbm=1`, `sbn=1`, `nsig=1`, `inan=0`, `fsub=1`, `ininf=1` |
 | `dp2a` | `__dp2a_lo` and `__dp2a_hi` | `slo=4194176`, `ulo=4194432`, `zlo=0`, `sff=-1`, `uff=255`, `wrap=-2147483647` |
 | `fns` | `__fns` | `none=4294967295`, `up=1`, `down=1`, `bhi=4294967295`, `imin=0` |
+| `sqrt` | `sqrtf` and `sqrt` | `fm0=2147483648`, `fneg=2147483647`, `fsub=439682291`, `dneg=18444492273895866368`, `ndsig=18444492273895866369` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 
