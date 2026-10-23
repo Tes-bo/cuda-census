@@ -1,5 +1,6 @@
 {
   "cases": [
+    "abs",
     "average",
     "bit_scan",
     "byte_perm",
