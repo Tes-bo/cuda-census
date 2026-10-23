@@ -38,6 +38,7 @@
     "packed_sad",
     "packed_set",
     "ptx",
+    "remquo",
     "round_cvt",
     "round_wide",
     "sad",
