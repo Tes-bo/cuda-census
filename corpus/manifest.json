@@ -1084,6 +1084,19 @@
       }
     },
     {
+      "id": "wmma",
+      "source": "corpus/wmma/main.cu",
+      "expect": {
+        "c00": 12,
+        "c0f": 12,
+        "cf0": 10,
+        "cff": 10,
+        "trace": 62,
+        "weighted": 36182,
+        "colmajor": 256
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
