@@ -1012,6 +1012,24 @@
       }
     },
     {
+      "id": "symbols",
+      "source": "corpus/symbols/main.cu",
+      "expect": {
+        "t0": 3,
+        "t1": -6,
+        "t2": 12,
+        "t3": -24,
+        "t4": 3000,
+        "t5": -96,
+        "t6": 192,
+        "t7": -384,
+        "counter": 18,
+        "fifth": -32,
+        "scale": 3,
+        "size": 32
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
