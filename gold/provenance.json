@@ -7,6 +7,7 @@
     "coop_groups",
     "darith",
     "ddiv",
+    "device_printf",
     "double_as_longlong",
     "double_hi_lo",
     "dp2a",

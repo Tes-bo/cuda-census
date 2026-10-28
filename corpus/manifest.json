@@ -1097,6 +1097,18 @@
       }
     },
     {
+      "id": "device_printf",
+      "source": "corpus/device_printf/main.cu",
+      "expect": {
+        "dev": 42,
+        "devneg": -41,
+        "devll": -9223372036854775808,
+        "devu": 4294967295,
+        "devtid": 39,
+        "host": 1
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
