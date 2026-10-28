@@ -1047,6 +1047,11 @@
       }
     },
     {
+      "id": "stream_order",
+      "source": "corpus/stream_order/main.cu",
+      "expect": {"sum": 32896, "hostfn": 42, "eventdone": 1, "streamdone": 1}
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

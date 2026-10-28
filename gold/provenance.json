@@ -54,6 +54,7 @@
     "scale",
     "shared_atomic",
     "sqrt",
+    "stream_order",
     "symbols",
     "syncwarp",
     "vector_add_int",

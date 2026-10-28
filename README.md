@@ -62,7 +62,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-61 cases. The gold column is the `nvcc` stdout.
+62 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -125,6 +125,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `symbols` | `__constant__` and `__device__` symbols through `cudaMemcpyToSymbol` / `FromSymbol` at an offset, `cudaGetSymbolAddress`, and `cudaGetSymbolSize` | `t4=3000`, `counter=18`, `fifth=-32`, `size=32` |
 | `dynamic_shared` | 64 KiB of `extern __shared__` after the `cudaFuncSetAttribute` opt-in, and one buffer carved into int and double regions | `optin=65536`, `total=2605056`, `weighted=106345728`, `carved=41664` |
 | `managed` | `cudaMallocManaged` and `__managed__` used by host and device with no copy, and `cudaPointerGetAttributes` | `sum=1000000`, `again=-998000`, `bumps=2005`, `ismanaged=1` |
+| `stream_order` | an event orders two non-blocking streams, then `cudaMemcpyAsync` to pinned memory and `cudaLaunchHostFunc` | `sum=32896`, `hostfn=42`, `eventdone=1` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 
