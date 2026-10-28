@@ -58,6 +58,7 @@ int main() {
     CHECK(cudaMemcpy(b, bases, sizeof(bases), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(o, offsets, sizeof(offsets), cudaMemcpyHostToDevice));
     find<<<1, 1>>>(m, b, o, out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned got[15] = {};
     CHECK(cudaMemcpy(got, out, sizeof(got), cudaMemcpyDeviceToHost));

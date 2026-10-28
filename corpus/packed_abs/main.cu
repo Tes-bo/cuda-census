@@ -43,6 +43,7 @@ int main() {
     CHECK(cudaMalloc(&out, 12 * sizeof(unsigned)));
     CHECK(cudaMemset(out, 0, 12 * sizeof(unsigned)));
     magnitude<<<1, 1>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned host[12] = {};
     CHECK(cudaMemcpy(host, out, sizeof(host), cudaMemcpyDeviceToHost));

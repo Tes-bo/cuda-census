@@ -35,6 +35,7 @@ int main() {
     CHECK(cudaMalloc(&out, 2 * sizeof(unsigned)));
     CHECK(cudaMemset(out, 0, 2 * sizeof(unsigned)));
     reduce_lanes<<<1, 64>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned host[2] = {0, 0};
     CHECK(cudaMemcpy(host, out, sizeof(host), cudaMemcpyDeviceToHost));

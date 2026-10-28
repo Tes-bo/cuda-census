@@ -57,6 +57,7 @@ int main() {
     CHECK(cudaMemcpy(s, sbits, sizeof(sbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(u, ubits, sizeof(ubits), cudaMemcpyHostToDevice));
     dot2<<<1, 1>>>(s, u, out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int got[9] = {};
     CHECK(cudaMemcpy(got, out, sizeof(got), cudaMemcpyDeviceToHost));

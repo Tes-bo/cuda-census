@@ -86,6 +86,7 @@ int main() {
     CHECK(cudaMemcpy(in, bits, sizeof(bits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(ctl, ctrl, sizeof(ctrl), cudaMemcpyHostToDevice));
     ptx_ops<<<1, 1>>>(in, ctl, u);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned hu[22] = {};
     CHECK(cudaMemcpy(hu, u, sizeof(hu), cudaMemcpyDeviceToHost));

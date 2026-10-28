@@ -35,6 +35,7 @@ int main() {
     CHECK(cudaMemset(s, 0, 3 * sizeof(int)));
     CHECK(cudaMemset(u, 0, 2 * sizeof(unsigned)));
     dot4<<<1, 1>>>(s, u);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int hs[3] = {};
     unsigned hu[2] = {};

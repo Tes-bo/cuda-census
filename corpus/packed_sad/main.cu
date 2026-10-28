@@ -34,6 +34,7 @@ int main() {
     unsigned* out = nullptr;
     CHECK(cudaMalloc(&out, 6 * sizeof(unsigned)));
     packed_sad<<<1, 1>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned h[6] = {};
     CHECK(cudaMemcpy(h, out, sizeof(h), cudaMemcpyDeviceToHost));

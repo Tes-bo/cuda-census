@@ -21,6 +21,7 @@ int main() {
     int* out = nullptr;
     CHECK(cudaMalloc(&out, sizeof(int)));
     bits_of_one<<<1, 1>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int bits = 0;
     CHECK(cudaMemcpy(&bits, out, sizeof(bits), cudaMemcpyDeviceToHost));

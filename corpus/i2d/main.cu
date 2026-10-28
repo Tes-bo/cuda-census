@@ -94,6 +94,7 @@ int main() {
     CHECK(cudaMemcpy(si, ibits, sizeof(ibits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(ui, uibits, sizeof(uibits), cudaMemcpyHostToDevice));
     widen<<<1, 1>>>(s, u, si, ui, o);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned long long h[18] = {};
     CHECK(cudaMemcpy(h, o, sizeof(h), cudaMemcpyDeviceToHost));

@@ -102,6 +102,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits, sizeof(dbits), cudaMemcpyHostToDevice));
     split<<<1, 1>>>(f, d, bits, expo);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned long long hb[15] = {};
     int he[4] = {};

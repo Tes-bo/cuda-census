@@ -39,6 +39,7 @@ int main() {
     CHECK(cudaMemcpy(x, host_x, n * sizeof(int), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(y, host_y, n * sizeof(int), cudaMemcpyHostToDevice));
     add<<<1, n>>>(x, y, z, n);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaMemcpy(host_z, z, n * sizeof(int), cudaMemcpyDeviceToHost));
 

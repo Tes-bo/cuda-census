@@ -57,6 +57,7 @@ int main() {
     CHECK(cudaMalloc(&out, 10 * sizeof(unsigned)));
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     lengths<<<1, 1>>>(f, out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned got[10] = {};
     CHECK(cudaMemcpy(got, out, sizeof(got), cudaMemcpyDeviceToHost));

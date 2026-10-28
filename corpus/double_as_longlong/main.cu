@@ -21,6 +21,7 @@ int main() {
     unsigned long long* out = nullptr;
     CHECK(cudaMalloc(&out, sizeof(unsigned long long)));
     bits_of_one<<<1, 1>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned long long bits = 0;
     CHECK(cudaMemcpy(&bits, out, sizeof(bits), cudaMemcpyDeviceToHost));

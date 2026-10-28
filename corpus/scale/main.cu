@@ -127,6 +127,7 @@ int main() {
     CHECK(cudaMemcpy(e, ebits, sizeof(ebits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(el, lbits, sizeof(lbits), cudaMemcpyHostToDevice));
     powers<<<1, 1>>>(f, d, e, el, fout, dout);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned hf[16] = {};
     unsigned long long hd[9] = {};

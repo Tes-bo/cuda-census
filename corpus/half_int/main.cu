@@ -58,6 +58,7 @@ int main() {
     CHECK(cudaMalloc(&o, 21 * sizeof(*o)));
     CHECK(cudaMalloc(&q, 3 * sizeof(*q)));
     convert<<<1, 1>>>(o, q);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     long long ho[21] = {};
     unsigned long long hq[3] = {};

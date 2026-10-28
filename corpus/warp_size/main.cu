@@ -24,6 +24,7 @@ int main() {
     CHECK(cudaMalloc(&out, sizeof(int)));
     CHECK(cudaMemset(out, 0, sizeof(int)));
     read_width<<<1, 32>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int width = 0;
     CHECK(cudaMemcpy(&width, out, sizeof(int), cudaMemcpyDeviceToHost));

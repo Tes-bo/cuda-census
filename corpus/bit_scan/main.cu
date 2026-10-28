@@ -34,6 +34,7 @@ int main() {
     CHECK(cudaMalloc(&u, sizeof(unsigned)));
     CHECK(cudaMalloc(&z, sizeof(unsigned long long)));
     bit_scan<<<1, 1>>>(s, u, z);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int hs[6] = {};
     unsigned hu = 0;

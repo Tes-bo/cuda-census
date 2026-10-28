@@ -31,6 +31,7 @@ int main() {
     CHECK(cudaMalloc(&out, sizeof(int)));
     CHECK(cudaMemset(out, 0, sizeof(int)));
     count_threads<<<1, 128>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int total = 0;
     CHECK(cudaMemcpy(&total, out, sizeof(int), cudaMemcpyDeviceToHost));

@@ -129,6 +129,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits, sizeof(dbits), cudaMemcpyHostToDevice));
     magnitudes<<<1, 1>>>(n, w, f, d, io, lo, fo, dlo);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int hi[3] = {};
     long long hl[4] = {};

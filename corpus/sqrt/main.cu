@@ -101,6 +101,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits_in, sizeof(dbits_in), cudaMemcpyHostToDevice));
     roots<<<1, 1>>>(f, d, fo, dout);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned fg[10] = {};
     unsigned long long dg[10] = {};

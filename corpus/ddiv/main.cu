@@ -84,6 +84,7 @@ int main() {
     CHECK(cudaMalloc(&u, 29 * sizeof(unsigned long long)));
     CHECK(cudaMemcpy(in, bits, sizeof(bits), cudaMemcpyHostToDevice));
     round_ddiv<<<1, 1>>>(in, u);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned long long hu[29] = {};
     CHECK(cudaMemcpy(hu, u, sizeof(hu), cudaMemcpyDeviceToHost));

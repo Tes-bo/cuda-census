@@ -39,6 +39,7 @@ int main() {
     CHECK(cudaMalloc(&w, 2 * sizeof(long long)));
     CHECK(cudaMalloc(&z, sizeof(unsigned long long)));
     mulhi<<<1, 1>>>(s, u, w, z);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int hs[3] = {};
     unsigned hu = 0;

@@ -102,6 +102,7 @@ int main() {
     CHECK(cudaMemcpy(in, bits, sizeof(bits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(din, dbits_in, sizeof(dbits_in), cudaMemcpyHostToDevice));
     edges<<<1, 1>>>(in, din, u, d);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned hu[19] = {};
     unsigned long long hd[9] = {};

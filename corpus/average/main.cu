@@ -32,6 +32,7 @@ int main() {
     CHECK(cudaMemset(s, 0, 5 * sizeof(int)));
     CHECK(cudaMemset(u, 0, sizeof(unsigned)));
     average<<<1, 1>>>(s, u);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int hs[5] = {};
     unsigned hu = 0;

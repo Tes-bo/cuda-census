@@ -47,6 +47,8 @@ Each case prints `name=integer` lines and nothing else. The runner writes `resul
 | `gold-missing` | A vendor toolchain ran, but `gold/` has no `nvcc` stdout for that case. |
 | `toolchain-missing` | The official tool is not on `PATH`. |
 
+Every case checks `cudaGetLastError()` after its launches. A kernel that fails to launch, for example because it was built for the wrong architecture, exits non-zero and is reported as `run-fail`, not as a row of zeros.
+
 `gold/` is produced only by `nvcc`. `--write-gold` is rejected for every other toolchain.
 
 The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 12.0, V12.0.140`) on a Tesla V100-SXM2-32GB. `gold/provenance.json` records that run. HIPIFY, musify, and cu-bridge are wired in `toolchains.json` and were not executed in this tree, because those tools are not installed here. A machine that has them should run the same command and publish the JSON.

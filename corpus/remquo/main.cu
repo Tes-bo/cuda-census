@@ -117,6 +117,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits, sizeof(dbits), cudaMemcpyHostToDevice));
     quotients<<<1, 1>>>(f, d, fout, qout, dout, dq);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned hf[10] = {};
     int hq[10] = {};

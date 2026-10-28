@@ -34,6 +34,7 @@ int main() {
     CHECK(cudaMalloc(&out, sizeof(int)));
     CHECK(cudaMemset(out, 0, sizeof(int)));
     broadcast_lane<<<1, 32>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int sum = 0;
     CHECK(cudaMemcpy(&sum, out, sizeof(int), cudaMemcpyDeviceToHost));

@@ -28,6 +28,7 @@ int main() {
     CHECK(cudaMalloc(&out, 3 * sizeof(int)));
     CHECK(cudaMemset(out, 0, 3 * sizeof(int)));
     split_one<<<1, 1>>>(out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int host[3] = {};
     CHECK(cudaMemcpy(host, out, sizeof(host), cudaMemcpyDeviceToHost));

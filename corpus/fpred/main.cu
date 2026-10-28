@@ -83,6 +83,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits, sizeof(dbits), cudaMemcpyHostToDevice));
     classify<<<1, 1>>>(f, d, out);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     int got[23] = {};
     CHECK(cudaMemcpy(got, out, sizeof(got), cudaMemcpyDeviceToHost));

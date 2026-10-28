@@ -93,6 +93,7 @@ int main() {
     CHECK(cudaMemcpy(f, fbits, sizeof(fbits), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(d, dbits, sizeof(dbits), cudaMemcpyHostToDevice));
     round_to_int<<<1, 1>>>(f, d, o);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned long long h[21] = {};
     CHECK(cudaMemcpy(h, o, sizeof(h), cudaMemcpyDeviceToHost));

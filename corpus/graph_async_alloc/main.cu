@@ -45,6 +45,7 @@ int main() {
     total<<<1, 1, 0, stream>>>(scratch, n, out);
     CHECK(cudaFreeAsync(scratch, stream));
     CHECK(cudaStreamEndCapture(stream, &graph));
+    CHECK(cudaGetLastError());
     CHECK(cudaGraphInstantiate(&exec, graph, nullptr, nullptr, 0));
     CHECK(cudaGraphLaunch(exec, stream));
     CHECK(cudaStreamSynchronize(stream));

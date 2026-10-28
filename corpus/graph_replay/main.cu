@@ -33,6 +33,7 @@ int main() {
     CHECK(cudaStreamBeginCapture(stream, cudaStreamCaptureModeGlobal));
     fill_ones<<<1, n, 0, stream>>>(out, n);
     CHECK(cudaStreamEndCapture(stream, &graph));
+    CHECK(cudaGetLastError());
     CHECK(cudaGraphInstantiate(&exec, graph, nullptr, nullptr, 0));
     CHECK(cudaGraphLaunch(exec, stream));
     CHECK(cudaStreamSynchronize(stream));

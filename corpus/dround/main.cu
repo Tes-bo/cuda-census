@@ -66,6 +66,7 @@ int main() {
     CHECK(cudaMalloc(&u, 10 * sizeof(unsigned)));
     CHECK(cudaMalloc(&s, 8 * sizeof(long long)));
     convert<<<1, 1>>>(u, s);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
     unsigned hu[10] = {};
     long long hs[8] = {};
