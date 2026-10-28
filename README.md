@@ -149,7 +149,7 @@ Host-side tests, with no GPU:
 python3 -m unittest discover -s tests -v
 ```
 
-The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, `musify-text`, `mcc`, and `cucc` on `PATH`, and write their build and result files to a temporary directory. CI runs `self-check` and these tests on every push.
+The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, `musify-text`, `mcc`, and `cucc` on `PATH`, and write their build and result files to a temporary directory.
 
 ### Toolchain command lines
 
