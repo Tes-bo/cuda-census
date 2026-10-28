@@ -1,0 +1,15 @@
+tile0=120
+tile1=376
+tile2=632
+tile3=888
+warp0=496
+warp1=1520
+ballot=1431655765
+wsize=32
+hsize=16
+bsize=64
+hrank=3
+hcount=4
+csize=11
+crank=10
+csum=165

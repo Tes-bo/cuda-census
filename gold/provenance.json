@@ -4,6 +4,7 @@
     "average",
     "bit_scan",
     "byte_perm",
+    "coop_groups",
     "darith",
     "ddiv",
     "double_as_longlong",

@@ -1052,6 +1052,27 @@
       "expect": {"sum": 32896, "hostfn": 42, "eventdone": 1, "streamdone": 1}
     },
     {
+      "id": "coop_groups",
+      "source": "corpus/coop_groups/main.cu",
+      "expect": {
+        "tile0": 120,
+        "tile1": 376,
+        "tile2": 632,
+        "tile3": 888,
+        "warp0": 496,
+        "warp1": 1520,
+        "ballot": 1431655765,
+        "wsize": 32,
+        "hsize": 16,
+        "bsize": 64,
+        "hrank": 3,
+        "hcount": 4,
+        "csize": 11,
+        "crank": 10,
+        "csum": 165
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
