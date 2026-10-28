@@ -26,6 +26,7 @@
     "global_atomic",
     "graph_async_alloc",
     "graph_replay",
+    "grid_sync",
     "half2",
     "half_cvt",
     "half_int",
