@@ -985,6 +985,33 @@
       }
     },
     {
+      "id": "global_atomic",
+      "source": "corpus/global_atomic/main.cu",
+      "expect": {
+        "count": 256,
+        "oldsum": 32640,
+        "sub": -768,
+        "smax": -45,
+        "smin": -300,
+        "umax": 4294967251,
+        "umin": 5,
+        "inc": 6,
+        "dec": 4,
+        "or": 4294967295,
+        "and": 2147483648,
+        "xor": 85,
+        "exch": 7,
+        "exchold": 255,
+        "casset": 1,
+        "caswins": 1,
+        "u64wrap": 240,
+        "u64max": 280375465082880,
+        "u64min": 9223372036854775808,
+        "fadd": 1124073472,
+        "dadd": 4634204016564240384
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

@@ -21,6 +21,7 @@
     "fround",
     "fsplit",
     "funnelshift",
+    "global_atomic",
     "graph_async_alloc",
     "graph_replay",
     "half2",
