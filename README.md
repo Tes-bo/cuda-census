@@ -31,21 +31,25 @@ python3 -m census run --toolchain musify
 python3 -m census run --toolchain cu-bridge
 ```
 
-`run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1.
+`run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1. `--case <id>` runs one case. `--timeout <seconds>` limits each translate, compile, and run step (default 120).
 
-Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<case>.json`. `results/` is not committed.
+Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<case>.json`, which follows `schema/result.schema.json`. Paths inside the checkout are written relative to it. `results/` is not committed.
+
+`self-check` needs no GPU. It checks that every corpus directory, manifest entry, gold file, and `gold/provenance.json` entry agree, that `toolchains.json` only uses known keys and slots, and that the schema enums match the runner.
 
 ## Statuses
 
 | Status | Meaning |
 | --- | --- |
 | `pass` | The program ran and its integers match `gold/<case>.stdout`. |
-| `numeric-mismatch` | The program ran and at least one integer differs from gold. The diff is actual minus gold. |
-| `compile-fail` | Translate or compile returned non-zero. |
-| `run-fail` | The binary returned non-zero. |
+| `numeric-mismatch` | The program ran and at least one integer differs from gold. The diff is actual minus gold. A key that only one side printed has the diff `null`. |
+| `compile-fail` | Translate or compile returned non-zero, or ran past the timeout. |
+| `run-fail` | The binary returned non-zero, or ran past the timeout (`returncode` is `null`). |
 | `unparsed-stdout` | Stdout was not a set of `name=integer` lines. |
 | `gold-missing` | A vendor toolchain ran, but `gold/` has no `nvcc` stdout for that case. |
-| `toolchain-missing` | The official tool is not on `PATH`. |
+| `toolchain-missing` | One of the official tools for that toolchain is not on `PATH`. All tools are looked up before any step runs. |
+
+`nvcc` itself is compared with the `expect` integers in `corpus/manifest.json`. Vendors are compared with the committed `gold/` stdout.
 
 Every case checks `cudaGetLastError()` after its launches. A kernel that fails to launch, for example because it was built for the wrong architecture, exits non-zero and is reported as `run-fail`, not as a row of zeros.
 
@@ -119,11 +123,13 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Run
 
-Regenerate gold only from a real `nvcc` run, and only when the printed integers still match `corpus/manifest.json`:
+Regenerate gold only from a real `nvcc` run. A case is written to `gold/` only when it passes, which means its integers match `corpus/manifest.json`:
 
 ```bash
 python3 -m census run --toolchain nvcc --write-gold
 ```
+
+`--write-gold` refuses to run when the `nvcc` release or the GPU name differs from `gold/provenance.json`, so gold from two setups is never mixed. To move all gold to a new setup, delete `gold/*.stdout` and `gold/provenance.json` and regenerate every case.
 
 Host-side tests, with no GPU:
 
@@ -142,11 +148,11 @@ python3 -m unittest discover -s tests -v
 | `musify` | copy the file, `musify-text --inplace`, then `mcc` |
 | `cu-bridge` | no rewrite. `cucc` compiles the original `.cu` |
 
-Override a binary by putting the official tool on `PATH`.
+Override a binary by putting the official tool on `PATH`. A tool whose path, or symlink target, contains `cuda-retarget` is refused.
 
 ## Adding a case
 
-Add one directory under `corpus/<id>/` with a single `main.cu` that prints integer lines. Add the source path and the expected integers to `corpus/manifest.json`. Produce gold with `nvcc --write-gold` on NVIDIA hardware. Do not commit a gold file from any other compiler.
+Add one directory under `corpus/<id>/` with a single `main.cu` that prints integer lines. Follow each launch with `CHECK(cudaGetLastError())`. Add `corpus/<id>/main.cu` and the expected integers to `corpus/manifest.json`. Produce gold with `python3 -m census run --toolchain nvcc --case <id> --write-gold` on NVIDIA hardware, then run `self-check`. Do not commit a gold file from any other compiler.
 
 ## License
 

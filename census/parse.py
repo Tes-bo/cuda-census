@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import re
 
-_LINE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(-?[0-9]+)$")
+KEY_PATTERN = r"[A-Za-z_][A-Za-z0-9_]*"
+_LINE = re.compile(rf"^({KEY_PATTERN})=(-?[0-9]+)$")
 
 
 def parse_stdout(text: str) -> dict[str, int] | None:
@@ -26,11 +27,16 @@ def parse_stdout(text: str) -> dict[str, int] | None:
     return keys
 
 
-def diffs(gold: dict[str, int], actual: dict[str, int]) -> dict[str, int]:
-    """Map every key that disagrees to actual - gold."""
-    names = sorted(set(gold) | set(actual))
-    out: dict[str, int] = {}
-    for name in names:
-        if gold.get(name) != actual.get(name):
-            out[name] = actual.get(name, 0) - gold.get(name, 0)
+def diffs(gold: dict[str, int], actual: dict[str, int]) -> dict[str, int | None]:
+    """Map every key that disagrees to actual - gold.
+
+    A key that only one side printed maps to None, so a missing key is never
+    reported as a numeric difference.
+    """
+    out: dict[str, int | None] = {}
+    for name in sorted(set(gold) | set(actual)):
+        if name not in gold or name not in actual:
+            out[name] = None
+        elif gold[name] != actual[name]:
+            out[name] = actual[name] - gold[name]
     return out

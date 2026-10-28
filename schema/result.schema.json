@@ -37,9 +37,9 @@
     "returncode": {"type": ["integer", "null"]},
     "stdout_sha256": {"type": ["string", "null"]},
     "gold_sha256": {"type": ["string", "null"]},
-    "keys": {"type": ["object", "null"]},
-    "gold_keys": {"type": ["object", "null"]},
-    "diffs": {"type": "object"},
+    "keys": {"type": ["object", "null"], "additionalProperties": {"type": "integer"}},
+    "gold_keys": {"type": ["object", "null"], "additionalProperties": {"type": "integer"}},
+    "diffs": {"type": "object", "additionalProperties": {"type": ["integer", "null"]}},
     "stderr_tail": {"type": "string"},
     "seconds": {"type": "number"}
   }
