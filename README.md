@@ -29,13 +29,16 @@ python3 -m census run --toolchain nvcc
 python3 -m census run --toolchain hipify
 python3 -m census run --toolchain musify
 python3 -m census run --toolchain cu-bridge
+python3 -m census report
 ```
 
 `run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1. `--case <id>` runs one case. `--timeout <seconds>` limits each translate, compile, and run step (default 120).
 
 Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<case>.json`, which follows `schema/result.schema.json`. Paths inside the checkout are written relative to it. `results/` is not committed.
 
-`self-check` needs no GPU. It checks that every corpus directory, manifest entry, gold file, and `gold/provenance.json` entry agree, that `toolchains.json` only uses known keys and slots, and that the schema enums match the runner.
+`report` prints `results/` as one Markdown table with a column per toolchain, then lists every mismatched key. Each result records the SHA-256 of the case source and of the gold it was compared with. A cell is marked `(stale)` when either file changed after the run, and stale cells are not counted as passes. `--toolchain` picks columns. `--output` writes the table to a file.
+
+`self-check` needs no GPU. It checks that every corpus directory, manifest entry, gold file, and `gold/provenance.json` entry agree, that `toolchains.json` only uses known keys and slots, that the schema matches the runner, and that the corpus table below and `docs/overview.svg` show the manifest's cases and integers.
 
 ## Statuses
 
@@ -136,6 +139,8 @@ Host-side tests, with no GPU:
 ```bash
 python3 -m unittest discover -s tests -v
 ```
+
+The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, `musify-text`, `mcc`, and `cucc` on `PATH`, and write their build and result files to a temporary directory. CI runs `self-check` and these tests on every push.
 
 ### Toolchain command lines
 

@@ -25,8 +25,12 @@ from census.toolchains import (
 )
 
 DEFAULT_TIMEOUT = 120
-PROVENANCE_PATH = ROOT / "gold" / "provenance.json"
 PROVENANCE_FIELDS = ("toolchain", "nvcc", "gpu")
+
+# Module attributes, read at call time, so tests can point them elsewhere.
+GOLD_DIR = ROOT / "gold"
+BUILD_DIR = ROOT / "build"
+RESULTS_DIR = ROOT / "results"
 
 STATUSES = (
     "pass",
@@ -44,6 +48,7 @@ RESULT_KEYS = (
     "status",
     "argv",
     "returncode",
+    "source_sha256",
     "stdout_sha256",
     "gold_sha256",
     "keys",
@@ -65,11 +70,27 @@ def cases_by_id() -> dict[str, dict]:
 
 
 def gold_path(case_id: str) -> Path:
-    return ROOT / "gold" / f"{case_id}.stdout"
+    return GOLD_DIR / f"{case_id}.stdout"
+
+
+def provenance_path() -> Path:
+    return GOLD_DIR / "provenance.json"
+
+
+def result_path(toolchain: str, case_id: str) -> Path:
+    return RESULTS_DIR / toolchain / f"{case_id}.json"
+
+
+def source_path(case: dict) -> Path:
+    return ROOT / case["source"]
 
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def file_sha256(path: Path) -> str | None:
+    return _sha256(path.read_bytes()) if path.is_file() else None
 
 
 def _tail(text: str, limit: int = 4000) -> str:
@@ -98,6 +119,7 @@ def _result(**fields) -> dict:
         "status": "run-fail",
         "argv": [],
         "returncode": None,
+        "source_sha256": None,
         "stdout_sha256": None,
         "gold_sha256": None,
         "keys": None,
@@ -155,11 +177,11 @@ class Step:
 
 
 def prepare_workdir(case: dict, toolchain: str, profile: dict) -> tuple[Path, dict[str, str], list[Step]]:
-    work = ROOT / "build" / toolchain / case["id"]
+    work = BUILD_DIR / toolchain / case["id"]
     if work.exists():
         shutil.rmtree(work)
     work.mkdir(parents=True)
-    source = ROOT / case["source"]
+    source = source_path(case)
     slots = {
         "source": str(source),
         "binary": str(work / "case"),
@@ -185,8 +207,16 @@ def execute_case(case: dict, toolchain: str, timeout: int = DEFAULT_TIMEOUT) -> 
     if toolchain not in profiles:
         raise ToolchainError(f"unknown toolchain {toolchain}")
 
+    source_sha256 = file_sha256(source_path(case))
+
     def finish(**fields) -> dict:
-        return _result(case=case["id"], toolchain=toolchain, seconds=time.monotonic() - started, **fields)
+        return _result(
+            case=case["id"],
+            toolchain=toolchain,
+            source_sha256=source_sha256,
+            seconds=time.monotonic() - started,
+            **fields,
+        )
 
     work, slots, steps = prepare_workdir(case, toolchain, profiles[toolchain])
 
@@ -253,7 +283,7 @@ def execute_case(case: dict, toolchain: str, timeout: int = DEFAULT_TIMEOUT) -> 
 
 
 def write_result(result: dict) -> Path:
-    dest = ROOT / "results" / result["toolchain"] / f"{result['case']}.json"
+    dest = result_path(result["toolchain"], result["case"])
     dest.parent.mkdir(parents=True, exist_ok=True)
     public = {key: result[key] for key in RESULT_KEYS}
     dest.write_text(json.dumps(public, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -261,9 +291,10 @@ def write_result(result: dict) -> Path:
 
 
 def load_provenance() -> dict | None:
-    if not PROVENANCE_PATH.is_file():
+    path = provenance_path()
+    if not path.is_file():
         return None
-    return json.loads(PROVENANCE_PATH.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def provenance_conflict(current: dict) -> str | None:
@@ -295,7 +326,7 @@ def write_gold(case_id: str, stdout: bytes, provenance: dict) -> None:
     recorded = load_provenance() or {}
     recorded.update(provenance)
     recorded["cases"] = sorted(set(recorded.get("cases", [])) | {case_id})
-    PROVENANCE_PATH.write_text(json.dumps(recorded, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    provenance_path().write_text(json.dumps(recorded, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _first_line(argv: list[str], needle: str = "") -> str:

@@ -9,8 +9,11 @@ import json
 import re
 import sys
 from collections import Counter
+from pathlib import Path
 
+from census import runner
 from census.parse import KEY_PATTERN, diffs, parse_stdout
+from census.report import build_report
 from census.runner import (
     DEFAULT_TIMEOUT,
     RESULT_KEYS,
@@ -36,6 +39,8 @@ from census.toolchains import (
 )
 
 _CASE_ID = re.compile(r"[a-z0-9_]+")
+_README_ROW = re.compile(r"^\| `([a-z0-9_]+)` \| (.+) \| (.+) \|$")
+_README_VALUE = re.compile(rf"`({KEY_PATTERN})=(-?[0-9]+)`")
 
 
 def cmd_list(_args: argparse.Namespace) -> int:
@@ -81,14 +86,49 @@ def _manifest_problems(manifest: dict) -> list[str]:
     for path in sorted((ROOT / "corpus").iterdir()):
         if path.is_dir() and path.name not in seen:
             problems.append(f"corpus/{path.name}/ is not in the manifest")
-    for path in sorted((ROOT / "gold").glob("*.stdout")):
+    for path in sorted(runner.GOLD_DIR.glob("*.stdout")):
         if path.stem not in seen:
             problems.append(f"gold/{path.name} has no manifest case")
     return problems
 
 
+def _docs_problems(manifest: dict, readme: Path, svg: Path) -> list[str]:
+    """The README corpus table and the overview count are written by hand; keep them on the manifest."""
+    cases = manifest["cases"]
+    expect = {case["id"]: case["expect"] for case in cases}
+    problems: list[str] = []
+    text = readme.read_text(encoding="utf-8")
+    section = text.split("\n## Corpus\n", 1)[-1].split("\n## ", 1)[0] if "\n## Corpus\n" in text else ""
+    if not section:
+        return ["README has no ## Corpus section"]
+    rows = [m for m in map(_README_ROW.match, section.splitlines()) if m]
+    ids = [m.group(1) for m in rows]
+    if ids != [case["id"] for case in cases]:
+        missing = [cid for cid in expect if cid not in ids]
+        extra = [cid for cid in ids if cid not in expect]
+        problems.append(
+            "README corpus table does not list the manifest cases in manifest order"
+            + (f"; missing {', '.join(missing)}" if missing else "")
+            + (f"; unknown {', '.join(extra)}" if extra else "")
+        )
+    for match in rows:
+        cid = match.group(1)
+        shown = _README_VALUE.findall(match.group(3))
+        if cid in expect and not shown:
+            problems.append(f"README row {cid} shows no gold values")
+        for key, value in shown:
+            if cid in expect and expect[cid].get(key) != int(value):
+                problems.append(f"README row {cid} shows {key}={value}, manifest has {expect[cid].get(key)}")
+    count = f"{len(cases)} cases"
+    if not section.lstrip("\n").startswith(f"{count}. "):
+        problems.append(f"README corpus section does not say {count!r}")
+    if f">{count}</text>" not in svg.read_text(encoding="utf-8"):
+        problems.append(f"docs/overview.svg does not say {count!r}")
+    return problems
+
+
 def _provenance_problems() -> list[str]:
-    gold_ids = {path.stem for path in (ROOT / "gold").glob("*.stdout")}
+    gold_ids = {path.stem for path in runner.GOLD_DIR.glob("*.stdout")}
     recorded = load_provenance()
     if recorded is None:
         return ["gold/provenance.json is missing"] if gold_ids else []
@@ -132,7 +172,12 @@ def _toolchain_problems() -> list[str]:
 
 def cmd_self_check(_args: argparse.Namespace) -> int:
     manifest = load_manifest()
-    problems = _manifest_problems(manifest) + _provenance_problems() + _toolchain_problems()
+    problems = (
+        _manifest_problems(manifest)
+        + _provenance_problems()
+        + _toolchain_problems()
+        + _docs_problems(manifest, ROOT / "README.md", ROOT / "docs" / "overview.svg")
+    )
     for problem in problems:
         print(problem, file=sys.stderr)
     if problems:
@@ -178,7 +223,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             return 1
         path = write_result(result)
         counts[result["status"]] += 1
-        print(f"{result['status']:20} {result['case']:20} {path.relative_to(ROOT)}", flush=True)
+        shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        print(f"{result['status']:20} {result['case']:20} {shown}", flush=True)
         if provenance is not None and result["status"] == "pass":
             write_gold(case["id"], stdout, provenance)
 
@@ -190,6 +236,16 @@ def cmd_run(args: argparse.Namespace) -> int:
     if failed == {"toolchain-missing"}:
         return 2
     return 1
+
+
+def cmd_report(args: argparse.Namespace) -> int:
+    toolchains = args.toolchain or official_names()
+    text = build_report(toolchains)
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+    else:
+        sys.stdout.write(text)
+    return 0
 
 
 def _positive(text: str) -> int:
@@ -214,12 +270,17 @@ def main(argv: list[str] | None = None) -> int:
         help=f"seconds allowed for each translate, compile, and run step (default {DEFAULT_TIMEOUT})",
     )
     run.add_argument("--write-gold", action="store_true", help="nvcc only: record passing stdout as gold")
+    report = sub.add_parser("report", help="print results/ as one Markdown table")
+    report.add_argument(
+        "--toolchain",
+        action="append",
+        choices=official_names(),
+        help="column to include; repeat for more (default: every toolchain)",
+    )
+    report.add_argument("--output", help="write the table to this file instead of stdout")
     args = parser.parse_args(argv)
-    if args.cmd == "list":
-        return cmd_list(args)
-    if args.cmd == "self-check":
-        return cmd_self_check(args)
-    return cmd_run(args)
+    commands = {"list": cmd_list, "self-check": cmd_self_check, "run": cmd_run, "report": cmd_report}
+    return commands[args.cmd](args)
 
 
 if __name__ == "__main__":
