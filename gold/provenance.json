@@ -11,6 +11,7 @@
     "dp2a",
     "dp4a",
     "dround",
+    "dynamic_shared",
     "farith",
     "fdiv",
     "float_as_int",

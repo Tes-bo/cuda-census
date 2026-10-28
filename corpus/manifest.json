@@ -1030,6 +1030,11 @@
       }
     },
     {
+      "id": "dynamic_shared",
+      "source": "corpus/dynamic_shared/main.cu",
+      "expect": {"optin": 65536, "total": 2605056, "weighted": 106345728, "carved": 41664}
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
