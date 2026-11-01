@@ -1129,6 +1129,22 @@
       }
     },
     {
+      "id": "launch_errors",
+      "source": "corpus/launch_errors/main.cu",
+      "expect": {
+        "toomany": 1,
+        "peekkeeps": 1,
+        "gettakes": 1,
+        "cleared": 1,
+        "zeroblocks": 1,
+        "gridy": 1,
+        "bigshared": 1,
+        "syncok": 1,
+        "untouched": 1,
+        "sum": 320
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

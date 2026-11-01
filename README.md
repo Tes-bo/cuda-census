@@ -64,7 +64,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-67 cases. The gold column is the `nvcc` stdout.
+68 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -133,6 +133,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `wmma` | one 16x16x16 `wmma` half multiply into a float accumulator | `c00=12`, `trace=62`, `weighted=36182`, `colmajor=256` |
 | `device_printf` | kernel `printf` of `%d`, `%lld`, and `%u`, flushed before host stdout | `dev=42`, `devll=-9223372036854775808`, `devu=4294967295`, `host=1` |
 | `shfl_width` | `__shfl_sync` / `_up` / `_down` / `_xor` with a width below 32, a 64-bit shuffle, and `__activemask` in a partial warp | `xor8l3=10`, `xor8l11=10`, `active32=255`, `part=9256` |
+| `launch_errors` | launches the runtime must refuse (too many threads, zero blocks, grid y above 65535, too much shared memory), and peek versus get | `toomany=1`, `cleared=1`, `zeroblocks=1`, `sum=320` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

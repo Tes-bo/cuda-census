@@ -36,6 +36,7 @@
     "hcmp",
     "hypot",
     "i2d",
+    "launch_errors",
     "lround",
     "managed",
     "match_any",
