@@ -132,6 +132,30 @@ class PolicyTests(unittest.TestCase):
                     with self.assertRaises(ToolchainError):
                         which_allowed("hipcc")
 
+    def test_search_directories_come_after_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first, extra = Path(tmp) / "first", Path(tmp) / "extra"
+            first.mkdir()
+            extra.mkdir()
+            in_extra = _write_tool(extra, "hipcc", FAKE_COMPILER)
+            with mock.patch.dict(os.environ, {"PATH": str(first)}):
+                self.assertIsNone(which_allowed("hipcc"))
+                self.assertEqual(which_allowed("hipcc", [str(extra)]), str(in_extra))
+                in_path = _write_tool(first, "hipcc", FAKE_COMPILER)
+                self.assertEqual(which_allowed("hipcc", [str(extra)]), str(in_path))
+                with self.assertRaises(ToolchainError):
+                    which_allowed("nvcc", [str(Path(tmp) / "cuda-retarget" / "bin")])
+
+    def test_run_and_search_are_validated(self) -> None:
+        profiles = {
+            "nvcc": {"role": "reference", "compile": ["nvcc"], "run": False},
+            "hipify": {"role": "vendor", "compile": ["hipcc"], "run": "no", "search": ["opt/rocm/bin"]},
+        }
+        problems = "\n".join(profile_problems(profiles))
+        self.assertIn("the gold toolchain must run its binaries", problems)
+        self.assertIn("run must be true or false", problems)
+        self.assertIn("search must be a list of absolute directories", problems)
+
     def test_committed_profiles_are_valid(self) -> None:
         self.assertEqual(profile_problems(load_profiles()), [])
 
@@ -197,7 +221,9 @@ class _Sandbox(unittest.TestCase):
         result, raw = execute_case(self.case, toolchain, "m1", timeout=timeout)
         self.assertEqual(result["machine"], "m1")
         self.assertEqual(list(result), list(RESULT_KEYS))
-        if result["status"] not in ("compile-fail", "toolchain-missing") and result["returncode"] is not None:
+        if result["status"] in ("compiled", "compile-fail", "toolchain-missing"):
+            self.assertEqual(raw, b"")
+        elif result["returncode"] is not None:
             self.assertEqual(raw, stdout)
         return result
 
@@ -270,6 +296,38 @@ class RunnerTests(_Sandbox):
         copy = runner.BUILD_DIR / "musify" / "probe" / "main.cu"
         self.assertEqual(copy.read_text(encoding="utf-8"), "// probe\n// musified\n")
 
+    def test_compile_only_stops_before_running(self) -> None:
+        # The binary would exit 3 if it ran.
+        result = self.run_case("hipify-gfx942", rc=3, stderr="ran\n")
+        self.assertEqual(result["status"], "compiled")
+        self.assertEqual(result["returncode"], 0)
+        self.assertEqual(result["argv"][0], "hipcc")
+        self.assertIn("--offload-arch=gfx942", result["argv"])
+        self.assertIsNone(result["stdout_sha256"])
+        self.assertIsNone(result["gold_sha256"])
+        self.assertNotIn("ran", result["stderr_tail"])
+
+    def test_compile_only_keeps_compiler_warnings(self) -> None:
+        compiler = self.bin / "hipcc"
+        body = compiler.read_text(encoding="utf-8").replace(
+            'out = sys.argv', 'sys.stderr.write("x.hip:3:1: warning: deprecated\\n")\nout = sys.argv', 1
+        )
+        compiler.write_text(body, encoding="utf-8")
+        result = self.run_case("hipify-gfx942")
+        self.assertEqual(result["status"], "compiled")
+        self.assertIn("warning: deprecated", result["stderr_tail"])
+
+    def test_compile_only_fail(self) -> None:
+        result = self.run_case("hipify-gfx942", compile_fail=1)
+        self.assertEqual(result["status"], "compile-fail")
+        self.assertIn("no such intrinsic", result["stderr_tail"])
+
+    def test_a_zero_exit_without_a_binary_is_a_compile_fail(self) -> None:
+        _write_tool(self.bin, "hipcc", f"#!{PY}\nimport sys\nsys.exit(0)\n")
+        result = self.run_case("hipify")
+        self.assertEqual(result["status"], "compile-fail")
+        self.assertIn("exited 0 but wrote no", result["stderr_tail"])
+
     def test_paths_in_the_checkout_are_relative(self) -> None:
         result = runner._result(argv=[str(ROOT / "build" / "nvcc" / "x" / "case")])
         self.assertEqual(result["argv"], [os.path.join("build", "nvcc", "x", "case")])
@@ -322,6 +380,12 @@ class CliTests(_Sandbox):
         code, _, err = self.call("run", "--toolchain", "nvcc", "--case", "nope")
         self.assertEqual(code, 2)
         self.assertIn("unknown case nope", err)
+
+    def test_all_compiled_exits_0(self) -> None:
+        cid = load_manifest()["cases"][0]["id"]
+        code, out, err = self.call("run", "--toolchain", "hipify-gfx942", "--case", cid, "--machine", "m1")
+        self.assertEqual(code, 0, err)
+        self.assertIn("hipify-gfx942: 1 compiled", out)
 
     def test_machine_label_is_validated(self) -> None:
         for bad in ("../up", "Upper", "", "a" * 65):
@@ -410,9 +474,25 @@ class ReportTests(unittest.TestCase):
         self.assertIn(f"| `{second['id']}` | not run | pass (stale) | not run |", lines)
         self.assertIn(f"| `{third['id']}` | not run | not run | not run |", lines)
         n = len(self.cases)
-        self.assertIn(f"| **pass** | 1/{n} | 0/{n} | 0/{n} |", lines)
+        self.assertIn(f"| **pass or compiled** | 1/{n} | 0/{n} | 0/{n} |", lines)
         self.assertIn("`sum` -1, `x` printed by one side only", text)
         self.assertIn(f"`hipify` (m1) `{second['id']}` is stale: source changed.", text)
+
+    def test_compile_only_column(self) -> None:
+        first, second = self.cases[:2]
+        self.put("hipify-gfx942", first, status="compiled", gold_sha256=None)
+        log = "translated.hip:24:15: warning: unused\ntranslated.hip:30:1: error: use of undeclared identifier '__uni_sync'\nmore"
+        self.put("hipify-gfx942", second, status="compile-fail", gold_sha256=None, stderr_tail=log)
+        text = build_report(["hipify-gfx942"])
+        lines = text.splitlines()
+        self.assertIn(f"| `{first['id']}` | compiled |", lines)
+        self.assertIn(f"| **pass or compiled** | 1/{len(self.cases)} |", lines)
+        self.assertNotIn("stale", text)
+        self.assertIn(
+            f"- `hipify-gfx942` (m1) `{second['id']}` does not compile: "
+            "translated.hip:30:1: error: use of undeclared identifier '__uni_sync'",
+            lines,
+        )
 
     def test_each_machine_is_a_column_with_its_environment(self) -> None:
         first = self.cases[0]

@@ -22,12 +22,13 @@
   ],
   "properties": {
     "case": {"type": "string"},
-    "toolchain": {"type": "string", "enum": ["nvcc", "hipify", "musify", "cu-bridge"]},
+    "toolchain": {"type": "string", "enum": ["nvcc", "hipify", "hipify-gfx942", "musify", "cu-bridge"]},
     "machine": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
     "status": {
       "type": "string",
       "enum": [
         "pass",
+        "compiled",
         "compile-fail",
         "run-fail",
         "numeric-mismatch",

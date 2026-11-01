@@ -27,12 +27,13 @@ python3 -m census self-check
 python3 -m census list
 python3 -m census run --toolchain nvcc
 python3 -m census run --toolchain hipify
+python3 -m census run --toolchain hipify-gfx942
 python3 -m census run --toolchain musify
 python3 -m census run --toolchain cu-bridge
 python3 -m census report
 ```
 
-`run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1. `--case <id>` runs one case. `--timeout <seconds>` limits each translate, compile, and run step (default 120).
+`run` exits 0 when every selected case is `pass`, or `compiled` for a compile-only toolchain. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1. `--case <id>` runs one case. `--timeout <seconds>` limits each translate, compile, and run step (default 120).
 
 Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<machine>/<case>.json`, which follows `schema/result.schema.json`. Paths inside the checkout are written relative to it. `results/` is not committed.
 
@@ -47,6 +48,7 @@ Each case prints `name=integer` lines and nothing else. The runner writes `resul
 | Status | Meaning |
 | --- | --- |
 | `pass` | The program ran and its integers match `gold/<case>.stdout`. |
+| `compiled` | A compile-only toolchain translated and compiled the case. Nothing ran, so nothing was compared. `stderr_tail` keeps the translator and compiler warnings. |
 | `numeric-mismatch` | The program ran and at least one integer differs from gold. The diff is actual minus gold. A key that only one side printed has the diff `null`. |
 | `compile-fail` | Translate or compile returned non-zero, or ran past the timeout. |
 | `run-fail` | The binary returned non-zero, or ran past the timeout (`returncode` is `null`). |
@@ -168,12 +170,17 @@ The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, 
 | --- | --- |
 | `nvcc` | compiles the corpus file |
 | `hipify` | `hipify-perl` writes `translated.hip`, then `hipcc` compiles it. On a Hygon machine, `hipcc` is the DTK compiler on `PATH` |
+| `hipify-gfx942` | the same translation, then `hipcc --offload-arch=gfx942` (MI300). Compile only: it needs ROCm but no AMD GPU, and it stops at `compiled` |
 | `musify` | copy the file, `musify-text --inplace`, then `mcc` |
 | `cu-bridge` | no rewrite. `cucc` compiles the original `.cu` |
 
-Override a binary by putting the official tool on `PATH`. A tool whose path, or symlink target, contains `cuda-retarget` is refused.
+Override a binary by putting the official tool on `PATH`. A profile may list `search` directories that are tried after `PATH`. `hipify-gfx942` searches `/opt/rocm/bin`, where ROCm installs by default. A tool whose path, or symlink target, contains `cuda-retarget` is refused.
 
-A profile may also name a `version` command and a `gpu` command, which only feed `environment.json`. `nvcc` uses `nvcc --version` and `nvidia-smi`. `hipify` uses `hipcc --version` and `rocm-smi --showproductname`. `musify` and `cu-bridge` have neither yet, because their query flags are not confirmed. A missing or failing query is recorded as an empty string and does not affect any case.
+`hipify-gfx942` passes `--offload-arch` because without it `hipcc` probes the local GPU, and on a machine without a supported AMD GPU that probe can hang. A ROCm install for compiling only needs `hipcc`, `hip-dev`, `hip-runtime-amd`, `hipify-clang`, and `rocm-device-libs`, plus `rocthrust-dev` and `hipcub-dev` for `thrust_cub`. The AMD kernel driver is not needed.
+
+ROCm's clang also searches `/usr/include`. Ubuntu's `nvidia-cuda-toolkit` installs the CUDA headers there, so on such a machine a CUDA header that hipify left in place is found as NVIDIA's copy instead of failing as missing, and rocThrust picks up NVIDIA's libcu++ in place of its own fallback. A CUDA toolkit installed under `/usr/local/cuda` does not have this effect. Compile-only results from a machine with CUDA in `/usr/include` should say so.
+
+A profile may also name a `version` command and a `gpu` command, which only feed `environment.json`. `nvcc` uses `nvcc --version` and `nvidia-smi`. `hipify` uses `hipcc --version` and `rocm-smi --showproductname`. `hipify-gfx942` only asks `hipcc --version`, since it uses no GPU. `musify` and `cu-bridge` have neither yet, because their query flags are not confirmed. A missing or failing query is recorded as an empty string and does not affect any case.
 
 ## Adding a case
 

@@ -39,6 +39,7 @@ RESULTS_DIR = ROOT / "results"
 
 STATUSES = (
     "pass",
+    "compiled",
     "numeric-mismatch",
     "compile-fail",
     "run-fail",
@@ -46,6 +47,8 @@ STATUSES = (
     "gold-missing",
     "toolchain-missing",
 )
+# "compiled" is the best outcome of a profile with "run": false.
+SUCCESS_STATUSES = ("pass", "compiled")
 
 RESULT_KEYS = (
     "case",
@@ -242,13 +245,15 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
             **fields,
         )
 
-    work, slots, steps = prepare_workdir(case, toolchain, profiles[toolchain])
+    profile = profiles[toolchain]
+    work, slots, steps = prepare_workdir(case, toolchain, profile)
+    search = profile.get("search", [])
 
     # Resolve every tool first, so a half-installed toolchain is reported as
     # missing before any step runs.
     resolved: list[str] = []
     for step in steps:
-        path = which_allowed(step.argv[0])
+        path = which_allowed(step.argv[0], search)
         if path is None:
             missing = finish(
                 status="toolchain-missing",
@@ -258,6 +263,7 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
             return missing, b""
         resolved.append(path)
 
+    logs: list[str] = []
     for step, path in zip(steps, resolved):
         proc = _run([path, *step.argv[1:]], work, timeout)
         if proc.returncode != 0:
@@ -268,10 +274,29 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
                 stderr_tail=proc.log(with_stdout=step.stdout_to is None),
             )
             return failed, b""
+        logs.append(proc.log(with_stdout=step.stdout_to is None))
         if step.stdout_to is not None:
             Path(step.stdout_to).write_bytes(proc.stdout)
 
     binary = slots["binary"]
+    if not Path(binary).is_file():
+        missing_binary = finish(
+            status="compile-fail",
+            argv=steps[-1].argv,
+            returncode=0,
+            stderr_tail=_tail(f"the compiler exited 0 but wrote no {_portable(binary)}\n" + "\n".join(filter(None, logs))),
+        )
+        return missing_binary, b""
+    if profile.get("run", True) is False:
+        # A compile-only profile targets hardware this machine does not have.
+        # The translate and compile logs are kept, since their warnings are the result.
+        compiled = finish(
+            status="compiled",
+            argv=steps[-1].argv,
+            returncode=0,
+            stderr_tail=_tail("\n".join(filter(None, logs))),
+        )
+        return compiled, b""
     proc = _run([binary], work, timeout)
     keys = _parse(proc.stdout)
     gold_file = gold_path(case["id"])
@@ -317,9 +342,9 @@ def write_result(result: dict) -> Path:
     return _write_json(result_path(result["toolchain"], result["machine"], result["case"]), public)
 
 
-def _capture(argv: list[str]) -> str:
+def _capture(argv: list[str], search: list[str] | tuple[str, ...] = ()) -> str:
     """Trimmed stdout of a short query command, or "" when the tool is absent or fails."""
-    path = which_allowed(argv[0])
+    path = which_allowed(argv[0], search)
     if path is None:
         return ""
     proc = _run([path, *argv[1:]], ROOT, 60)
@@ -331,18 +356,19 @@ def _capture(argv: list[str]) -> str:
 def describe_environment(toolchain: str, machine: str) -> dict:
     """What a run used: the resolved tools, their version text, and the GPU, where the profile says how to ask."""
     profile = load_profiles()[toolchain]
+    search = profile.get("search", [])
     tools: dict[str, str | None] = {}
     for key in ("translate", "compile"):
         if key in profile:
             name = profile[key][0]
-            found = which_allowed(name)
+            found = which_allowed(name, search)
             tools[name] = os.path.realpath(found) if found else None
     return {
         "toolchain": toolchain,
         "machine": machine,
         "tools": tools,
-        "version": _capture(profile["version"]) if "version" in profile else None,
-        "gpu": _capture(profile["gpu"]) if "gpu" in profile else None,
+        "version": _capture(profile["version"], search) if "version" in profile else None,
+        "gpu": _capture(profile["gpu"], search) if "gpu" in profile else None,
         "platform": platform.platform(),
     }
 

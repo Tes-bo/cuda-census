@@ -14,7 +14,17 @@ ROOT = Path(__file__).resolve().parents[1]
 GOLD_TOOLCHAIN = "nvcc"
 FORBIDDEN_NAMES = ("cuda-retarget", "retarget")
 SLOTS = ("source", "binary", "translated", "copied_source")
-PROFILE_KEYS = ("role", "compile", "translate", "translate_stdout", "copy_source_to", "version", "gpu")
+PROFILE_KEYS = (
+    "role",
+    "compile",
+    "translate",
+    "translate_stdout",
+    "copy_source_to",
+    "version",
+    "gpu",
+    "run",
+    "search",
+)
 COMMAND_KEYS = ("compile", "translate", "version", "gpu")
 _SLOT = re.compile(r"\{([A-Za-z_]+)\}")
 
@@ -38,15 +48,19 @@ def _reject(text: str) -> None:
         )
 
 
-def which_allowed(argv0: str) -> str | None:
-    """Resolve argv0 on PATH.
+def which_allowed(argv0: str, search: list[str] | tuple[str, ...] = ()) -> str | None:
+    """Resolve argv0 on PATH, then in the profile's search directories.
 
-    The name, the PATH hit, and the file a symlink points to are all checked,
-    so a shim directory such as /opt/cuda-retarget/bin cannot stand in for an
+    The name, the hit, and the file a symlink points to are all checked, so a
+    shim directory such as /opt/cuda-retarget/bin cannot stand in for an
     official binary.
     """
     _reject(argv0)
     found = shutil.which(argv0)
+    if found is None and search:
+        for directory in search:
+            _reject(directory)
+        found = shutil.which(argv0, path=os.pathsep.join(search))
     if found is None:
         return None
     _reject(found)
@@ -105,6 +119,16 @@ def profile_problems(profiles: dict) -> list[str]:
                 problems.append(f"{where}: {key} must be a string")
                 continue
             templates.append(profile[key])
+        if "run" in profile and not isinstance(profile["run"], bool):
+            problems.append(f"{where}: run must be true or false")
+        if name == GOLD_TOOLCHAIN and profile.get("run") is False:
+            problems.append(f"{where}: the gold toolchain must run its binaries")
+        if "search" in profile:
+            dirs = profile["search"]
+            if not isinstance(dirs, list) or not all(isinstance(d, str) and os.path.isabs(d) for d in dirs):
+                problems.append(f"{where}: search must be a list of absolute directories")
+            else:
+                templates.extend(dirs)
         for template in templates:
             for slot in _SLOT.findall(template):
                 if slot not in SLOTS:

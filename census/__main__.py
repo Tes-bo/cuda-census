@@ -242,7 +242,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     summary = ", ".join(f"{counts[status]} {status}" for status in STATUSES if counts[status])
     print(f"{args.toolchain}: {summary}")
-    failed = set(counts) - {"pass"}
+    failed = set(counts) - set(runner.SUCCESS_STATUSES)
     if not failed:
         return 0
     if failed == {"toolchain-missing"}:

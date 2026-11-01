@@ -13,6 +13,15 @@
     "version": ["hipcc", "--version"],
     "gpu": ["rocm-smi", "--showproductname"]
   },
+  "hipify-gfx942": {
+    "role": "vendor",
+    "run": false,
+    "search": ["/opt/rocm/bin"],
+    "translate": ["hipify-perl", "{source}"],
+    "translate_stdout": "{translated}",
+    "compile": ["hipcc", "-O2", "-std=c++17", "--offload-arch=gfx942", "{translated}", "-o", "{binary}"],
+    "version": ["hipcc", "--version"]
+  },
   "musify": {
     "role": "vendor",
     "copy_source_to": "{copied_source}",

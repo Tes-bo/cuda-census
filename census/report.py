@@ -44,7 +44,8 @@ def stale_reasons(case: dict, toolchain: str, result: dict) -> list[str]:
         reasons.append("written before results recorded the source hash")
     elif result["source_sha256"] != runner.file_sha256(runner.source_path(case)):
         reasons.append("source changed")
-    if toolchain != GOLD_TOOLCHAIN and result.get("status") not in ("compile-fail", "toolchain-missing"):
+    # Only a result that was compared with gold can go stale when gold changes.
+    if toolchain != GOLD_TOOLCHAIN and result.get("status") not in ("compiled", "compile-fail", "toolchain-missing"):
         if result.get("gold_sha256") != runner.file_sha256(runner.gold_path(case["id"])):
             reasons.append("gold changed")
     return reasons
@@ -70,6 +71,13 @@ def _diff_text(name: str, diff: int | None) -> str:
     if diff is None:
         return f"`{name}` printed by one side only"
     return f"`{name}` {diff:+d}"
+
+
+def first_error(log: str) -> str:
+    """The first compiler line that says error, else the first line, trimmed for one bullet."""
+    lines = [line.strip() for line in log.splitlines() if line.strip()]
+    hit = next((line for line in lines if re.search(r"\berror\b", line)), lines[0] if lines else "")
+    return hit[:200]
 
 
 def _version_line(text: str | None) -> str:
@@ -103,11 +111,11 @@ def build_report(toolchains: list[str]) -> str:
             1
             for case in cases
             if (r := table[case["id"], col]) is not None
-            and r["status"] == "pass"
+            and r["status"] in runner.SUCCESS_STATUSES
             and not stale_reasons(case, col[0], r)
         )
         passed.append(f"{count}/{len(cases)}")
-    lines.append("| **pass** | " + " | ".join(passed) + " |")
+    lines.append("| **pass or compiled** | " + " | ".join(passed) + " |")
 
     notes = []
     for case in cases:
@@ -121,6 +129,8 @@ def build_report(toolchains: list[str]) -> str:
             if result["status"] == "numeric-mismatch":
                 diffs = ", ".join(_diff_text(k, v) for k, v in sorted(result["diffs"].items()))
                 notes.append(f"- {_label(col)} `{case['id']}` differs from gold (actual minus gold): {diffs}.")
+            if result["status"] == "compile-fail":
+                notes.append(f"- {_label(col)} `{case['id']}` does not compile: {first_error(result['stderr_tail'])}")
     if notes:
         lines += ["", *notes]
 
