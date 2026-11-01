@@ -50,6 +50,7 @@
     "packed_minmax",
     "packed_sad",
     "packed_set",
+    "pitched_2d",
     "ptx",
     "remquo",
     "round_cvt",
