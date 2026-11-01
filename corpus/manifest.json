@@ -1215,6 +1215,27 @@
       }
     },
     {
+      "id": "thrust_cub",
+      "source": "corpus/thrust_cub/main.cu",
+      "expect": {
+        "sum": -500,
+        "first": -500,
+        "middle": 0,
+        "last": 499,
+        "squares": 83333500,
+        "scanhalf": -125250,
+        "scanend": -500,
+        "topindex": 321,
+        "cubsum": -500,
+        "block3": 769,
+        "blocktotal": 6129,
+        "warp0": 100,
+        "warp1": 99,
+        "warp2": 98,
+        "warp3": 97
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}

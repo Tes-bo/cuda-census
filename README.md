@@ -64,7 +64,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 
 ## Corpus
 
-72 cases. The gold column is the `nvcc` stdout.
+73 cases. The gold column is the `nvcc` stdout.
 
 | Case | What it exercises | Gold |
 | --- | --- | --- |
@@ -138,6 +138,7 @@ The committed gold was produced by CUDA 12.0 (`Cuda compilation tools, release 1
 | `pitched_2d` | `cudaMallocPitch`, `cudaMemcpy2D` at three pitches, and `cudaMemset2D` on a sub-rectangle | `set=16843316`, `edge=568`, `padding=1`, `blockcorner=157` |
 | `texture` | texture objects with point and linear filtering, clamp, border, wrap, and mirror, `tex1Dfetch`, and a surface read with zero and clamp boundaries | `lquarter=1107427328`, `mirror=1114636288`, `fetch5=22`, `sclamp=13` |
 | `device_malloc` | device `malloc` / `free` and `new[]` / `delete[]`, a failed 1 TiB request, and one template kernel for int and double | `isum=323584`, `dsum=17920`, `osum=59520`, `hugenull=32` |
+| `thrust_cub` | Thrust sort, reduce, scan, and `sort_by_key`, and CUB device, block, and warp reductions | `squares=83333500`, `scanhalf=-125250`, `topindex=321`, `warp3=97` |
 | `graph_replay` | Stream capture, instantiate, replay | `sum=32` |
 | `graph_async_alloc` | `cudaMallocAsync` / `cudaFreeAsync` inside a capture | `sum=32` |
 

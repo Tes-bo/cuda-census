@@ -66,6 +66,7 @@
     "symbols",
     "syncwarp",
     "texture",
+    "thrust_cub",
     "vector_add_int",
     "warp_reduce",
     "warp_shuffle",
