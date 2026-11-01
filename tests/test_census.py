@@ -237,7 +237,12 @@ class RunnerTests(_Sandbox):
         result = self.run_case()
         self.assertEqual(result["status"], "toolchain-missing")
         self.assertEqual(result["argv"][0], "hipcc")
-        self.assertFalse((runner.BUILD_DIR / "hipify" / "probe" / "translated.cu").exists())
+        self.assertFalse((runner.BUILD_DIR / "hipify" / "probe" / "translated.hip").exists())
+
+    def test_hipify_output_is_a_hip_file(self) -> None:
+        self.assertEqual(self.run_case()["status"], "pass")
+        translated = runner.BUILD_DIR / "hipify" / "probe" / "translated.hip"
+        self.assertEqual(translated.read_text(encoding="utf-8"), "// probe\n")
 
     def test_vendor_without_gold(self) -> None:
         (self.gold / "probe.stdout").unlink()

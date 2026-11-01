@@ -158,7 +158,7 @@ The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, 
 | Toolchain | What runs |
 | --- | --- |
 | `nvcc` | compiles the corpus file |
-| `hipify` | `hipify-perl`, then `hipcc`. On a Hygon machine, `hipcc` is the DTK compiler on `PATH` |
+| `hipify` | `hipify-perl` writes `translated.hip`, then `hipcc` compiles it. On a Hygon machine, `hipcc` is the DTK compiler on `PATH` |
 | `musify` | copy the file, `musify-text --inplace`, then `mcc` |
 | `cu-bridge` | no rewrite. `cucc` compiles the original `.cu` |
 

@@ -185,7 +185,9 @@ def prepare_workdir(case: dict, toolchain: str, profile: dict) -> tuple[Path, di
     slots = {
         "source": str(source),
         "binary": str(work / "case"),
-        "translated": str(work / "translated.cu"),
+        # hip-clang decides the language from the extension, and .hip is the
+        # extension HIP documents for HIP sources.
+        "translated": str(work / "translated.hip"),
         "copied_source": str(work / "main.cu"),
     }
     if "copy_source_to" in profile:
