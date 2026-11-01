@@ -10,6 +10,7 @@
     "translate": ["hipify-perl", "{source}"],
     "translate_stdout": "{translated}",
     "compile": ["hipcc", "-O2", "-std=c++17", "{translated}", "-o", "{binary}"],
+    "depends": ["hipcc", "-std=c++17", "-M", "-MG", "{translated}"],
     "version": ["hipcc", "--version"],
     "gpu": ["rocm-smi", "--showproductname"]
   },
@@ -20,6 +21,7 @@
     "translate": ["hipify-perl", "{source}"],
     "translate_stdout": "{translated}",
     "compile": ["hipcc", "-O2", "-std=c++17", "--offload-arch=gfx942", "{translated}", "-o", "{binary}"],
+    "depends": ["hipcc", "-std=c++17", "--offload-arch=gfx942", "-M", "-MG", "{translated}"],
     "version": ["hipcc", "--version"]
   },
   "musify": {

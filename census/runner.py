@@ -64,10 +64,50 @@ RESULT_KEYS = (
     "gold_keys",
     "diffs",
     "stderr_tail",
+    "cuda_headers",
     "seconds",
 )
 
 _ROOT_PREFIX = str(ROOT) + os.sep
+
+# A CUDA include root is a directory that holds cuda_runtime_api.h. Under such
+# a root, these top-level directories and file names belong to the CUDA
+# toolkit; everything else there (stdio.h, bits/, tbb/) is an ordinary system
+# header. ROCm ships no cuda_runtime_api.h, so its own trees never qualify.
+CUDA_DIRS = frozenset({"crt", "cooperative_groups", "cub", "thrust", "cuda", "nv", "nvtx3", "cccl"})
+_CUDA_FILE = re.compile(
+    r"^(cuda|cublas|cufft|curand|cusparse|cusolver|cudnn|nvrtc|nvml|nvjpeg|npp|nvToolsExt|"
+    r"vector_types|vector_functions|builtin_types|driver_types|driver_functions|host_defines|host_config|"
+    r"device_types|device_functions|device_launch_parameters|device_atomic_functions|device_double_functions|"
+    r"surface_|texture_|sm_\d|mma\.h|math_constants|library_types|channel_descriptor|common_functions|"
+    r"math_functions|cooperative_groups|fatbinary)"
+)
+
+
+def parse_depends(text: str) -> list[str]:
+    """The prerequisites of make-style dependency output such as `-M` prints."""
+    return [token for token in text.replace("\\\n", " ").split() if not token.endswith(":")]
+
+
+def cuda_headers(paths: list[str], cwd: Path) -> list[str]:
+    """The CUDA toolkit headers among a compile's dependencies, sorted and unique."""
+    roots: dict[Path, bool] = {}
+
+    def is_root(directory: Path) -> bool:
+        if directory not in roots:
+            roots[directory] = (directory / "cuda_runtime_api.h").is_file()
+        return roots[directory]
+
+    found: set[str] = set()
+    for raw in paths:
+        path = Path(os.path.realpath(raw if os.path.isabs(raw) else cwd / raw))
+        root = next((parent for parent in path.parents if is_root(parent)), None)
+        if root is None:
+            continue
+        rel = path.relative_to(root)
+        if rel.parts[0] in CUDA_DIRS or (len(rel.parts) == 1 and _CUDA_FILE.match(rel.name)):
+            found.add(str(path))
+    return sorted(found)
 
 
 def load_manifest() -> dict:
@@ -150,6 +190,7 @@ def _result(**fields) -> dict:
         "gold_keys": None,
         "diffs": {},
         "stderr_tail": "",
+        "cuda_headers": None,
         "seconds": 0.0,
     }
     empty.update(fields)
@@ -263,6 +304,20 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
             return missing, b""
         resolved.append(path)
 
+    def scan() -> list[str] | None:
+        """CUDA headers the compile read, from the profile's depends command, or None without one."""
+        if "depends" not in profile:
+            return None
+        argv = render(profile["depends"], slots)
+        tool = which_allowed(argv[0], search)
+        if tool is None:
+            return None
+        proc = _run([tool, *argv[1:]], work, timeout)
+        if proc.returncode != 0:
+            return None
+        found = cuda_headers(parse_depends(proc.stdout.decode("utf-8", "replace")), work)
+        return [_portable(path) for path in found]
+
     logs: list[str] = []
     for step, path in zip(steps, resolved):
         proc = _run([path, *step.argv[1:]], work, timeout)
@@ -272,6 +327,7 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
                 argv=step.argv,
                 returncode=proc.returncode,
                 stderr_tail=proc.log(with_stdout=step.stdout_to is None),
+                cuda_headers=scan() if step is steps[-1] else None,
             )
             return failed, b""
         logs.append(proc.log(with_stdout=step.stdout_to is None))
@@ -287,6 +343,7 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
             stderr_tail=_tail(f"the compiler exited 0 but wrote no {_portable(binary)}\n" + "\n".join(filter(None, logs))),
         )
         return missing_binary, b""
+    headers = scan()
     if profile.get("run", True) is False:
         # A compile-only profile targets hardware this machine does not have.
         # The translate and compile logs are kept, since their warnings are the result.
@@ -295,6 +352,7 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
             argv=steps[-1].argv,
             returncode=0,
             stderr_tail=_tail("\n".join(filter(None, logs))),
+            cuda_headers=headers,
         )
         return compiled, b""
     proc = _run([binary], work, timeout)
@@ -327,6 +385,7 @@ def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAUL
         gold_keys=gold_keys,
         diffs=key_diffs,
         stderr_tail=proc.log(with_stdout=False),
+        cuda_headers=headers,
     )
     return result, proc.stdout
 

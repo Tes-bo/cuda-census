@@ -24,8 +24,9 @@ PROFILE_KEYS = (
     "gpu",
     "run",
     "search",
+    "depends",
 )
-COMMAND_KEYS = ("compile", "translate", "version", "gpu")
+COMMAND_KEYS = ("compile", "translate", "version", "gpu", "depends")
 _SLOT = re.compile(r"\{([A-Za-z_]+)\}")
 
 

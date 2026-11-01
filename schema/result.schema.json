@@ -18,6 +18,7 @@
     "gold_keys",
     "diffs",
     "stderr_tail",
+    "cuda_headers",
     "seconds"
   ],
   "properties": {
@@ -46,6 +47,7 @@
     "gold_keys": {"type": ["object", "null"], "additionalProperties": {"type": "integer"}},
     "diffs": {"type": "object", "additionalProperties": {"type": ["integer", "null"]}},
     "stderr_tail": {"type": "string"},
+    "cuda_headers": {"type": ["array", "null"], "items": {"type": "string"}},
     "seconds": {"type": "number"}
   }
 }

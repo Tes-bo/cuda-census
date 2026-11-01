@@ -45,6 +45,9 @@ import os, sys
 if sys.argv[1:] == ["--version"]:
     print("fake compiler driver\\nfake compilation tools, release 1.2, V1.2.3")
     sys.exit(0)
+if "-M" in sys.argv:
+    print(os.environ.get("FAKE_DEPS", "translated.o: translated.hip"))
+    sys.exit(0)
 if os.environ.get("FAKE_COMPILE_FAIL"):
     sys.stderr.write("fake: error: no such intrinsic\\n")
     sys.exit(1)
@@ -317,6 +320,22 @@ class RunnerTests(_Sandbox):
         self.assertEqual(result["status"], "compiled")
         self.assertIn("warning: deprecated", result["stderr_tail"])
 
+    def test_cuda_headers_are_recorded(self) -> None:
+        cuda = self.tmp / "cuda" / "include"
+        (cuda / "crt").mkdir(parents=True)
+        for name in ("cuda_runtime_api.h", "crt/mma.h", "stdio.h"):
+            (cuda / name).write_text("", encoding="utf-8")
+        leaked = [os.path.realpath(cuda / "crt" / "mma.h")]
+        self.assertIsNone(self.run_case("nvcc")["cuda_headers"])
+        self.assertEqual(self.run_case("hipify-gfx942")["cuda_headers"], [])
+        deps = f"translated.o: translated.hip {cuda}/crt/mma.h \\\n  {cuda}/stdio.h"
+        compiled = self.run_case("hipify-gfx942", deps=deps)
+        self.assertEqual(compiled["status"], "compiled")
+        self.assertEqual(compiled["cuda_headers"], leaked)
+        failed = self.run_case("hipify-gfx942", deps=deps, compile_fail=1)
+        self.assertEqual(failed["status"], "compile-fail")
+        self.assertEqual(failed["cuda_headers"], leaked)
+
     def test_compile_only_fail(self) -> None:
         result = self.run_case("hipify-gfx942", compile_fail=1)
         self.assertEqual(result["status"], "compile-fail")
@@ -331,6 +350,28 @@ class RunnerTests(_Sandbox):
     def test_paths_in_the_checkout_are_relative(self) -> None:
         result = runner._result(argv=[str(ROOT / "build" / "nvcc" / "x" / "case")])
         self.assertEqual(result["argv"], [os.path.join("build", "nvcc", "x", "case")])
+
+
+class CudaHeaderTests(unittest.TestCase):
+    def test_only_toolkit_headers_under_a_cuda_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            inc = Path(tmp) / "include"
+            toolkit = ["cuda_runtime_api.h", "builtin_types.h", "mma.h", "cuda/std/version", "thrust/version.h"]
+            system = ["stdio.h", "curses.h", "tbb/tbb.h", "x86_64-linux-gnu/bits/types.h"]
+            for name in toolkit + system:
+                (inc / name).parent.mkdir(parents=True, exist_ok=True)
+                (inc / name).write_text("", encoding="utf-8")
+            # A ROCm tree has thrust/ too, but no cuda_runtime_api.h beside it.
+            rocm = Path(tmp) / "rocm" / "include" / "thrust"
+            rocm.mkdir(parents=True)
+            (rocm / "version.h").write_text("", encoding="utf-8")
+            paths = [str(inc / name) for name in toolkit + system] + [str(rocm / "version.h"), "translated.hip"]
+            got = runner.cuda_headers(paths, Path(tmp))
+        self.assertEqual(got, sorted(os.path.realpath(inc / name) for name in toolkit))
+
+    def test_parse_depends(self) -> None:
+        text = "a.o: a.hip /x/y.h \\\n  /z/w.h\nb.o: /q.h\n"
+        self.assertEqual(runner.parse_depends(text), ["a.hip", "/x/y.h", "/z/w.h", "/q.h"])
 
 
 class GoldTests(_Sandbox):
@@ -493,6 +534,16 @@ class ReportTests(unittest.TestCase):
             "translated.hip:30:1: error: use of undeclared identifier '__uni_sync'",
             lines,
         )
+
+    def test_cuda_headers_are_flagged_and_not_counted(self) -> None:
+        first = self.cases[0]
+        headers = ["/usr/include/crt/mma.h", "/usr/include/mma.h"]
+        self.put("hipify-gfx942", first, status="compiled", gold_sha256=None, cuda_headers=headers)
+        text = build_report(["hipify-gfx942"])
+        lines = text.splitlines()
+        self.assertIn(f"| `{first['id']}` | compiled (cuda headers) |", lines)
+        self.assertIn(f"| **pass or compiled** | 0/{len(self.cases)} |", lines)
+        self.assertIn("read 2 CUDA toolkit headers, first `/usr/include/crt/mma.h`", text)
 
     def test_each_machine_is_a_column_with_its_environment(self) -> None:
         first = self.cases[0]

@@ -62,9 +62,21 @@ def _cell(case: dict, toolchain: str, result: dict | None) -> str:
     text = result["status"]
     if text == "numeric-mismatch":
         text += f" ({len(result['diffs'])})"
+    if result.get("cuda_headers"):
+        text += " (cuda headers)"
     if stale_reasons(case, toolchain, result):
         text += " (stale)"
     return text
+
+
+def _counts(case: dict, toolchain: str, result: dict | None) -> bool:
+    """A success that is current and did not lean on CUDA toolkit headers."""
+    return (
+        result is not None
+        and result["status"] in runner.SUCCESS_STATUSES
+        and not result.get("cuda_headers")
+        and not stale_reasons(case, toolchain, result)
+    )
 
 
 def _diff_text(name: str, diff: int | None) -> str:
@@ -107,13 +119,7 @@ def build_report(toolchains: list[str]) -> str:
         lines.append(f"| `{case['id']}` | " + " | ".join(cells) + " |")
     passed = []
     for col in cols:
-        count = sum(
-            1
-            for case in cases
-            if (r := table[case["id"], col]) is not None
-            and r["status"] in runner.SUCCESS_STATUSES
-            and not stale_reasons(case, col[0], r)
-        )
+        count = sum(1 for case in cases if _counts(case, col[0], table[case["id"], col]))
         passed.append(f"{count}/{len(cases)}")
     lines.append("| **pass or compiled** | " + " | ".join(passed) + " |")
 
@@ -131,6 +137,12 @@ def build_report(toolchains: list[str]) -> str:
                 notes.append(f"- {_label(col)} `{case['id']}` differs from gold (actual minus gold): {diffs}.")
             if result["status"] == "compile-fail":
                 notes.append(f"- {_label(col)} `{case['id']}` does not compile: {first_error(result['stderr_tail'])}")
+            if result.get("cuda_headers"):
+                headers = result["cuda_headers"]
+                notes.append(
+                    f"- {_label(col)} `{case['id']}` read {len(headers)} CUDA toolkit headers, first `{headers[0]}`. "
+                    "This machine's CUDA install leaked into the build, so the result may differ on a machine without it."
+                )
     if notes:
         lines += ["", *notes]
 
