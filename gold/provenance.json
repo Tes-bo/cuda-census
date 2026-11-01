@@ -8,6 +8,7 @@
     "darith",
     "ddiv",
     "device_assert",
+    "device_malloc",
     "device_printf",
     "double_as_longlong",
     "double_hi_lo",
