@@ -1173,6 +1173,34 @@
       }
     },
     {
+      "id": "texture",
+      "source": "corpus/texture/main.cu",
+      "expect": {
+        "pmid": 1106247680,
+        "pnear": 1106247680,
+        "plow": 1092616192,
+        "phigh": 1117782016,
+        "blow": 0,
+        "bhigh": 0,
+        "bedge": 1117782016,
+        "lquarter": 1107427328,
+        "lhalf": 1097859072,
+        "llow": 1092616192,
+        "lhigh": 1117782016,
+        "wrap": 1106247680,
+        "wrapneg": 1117782016,
+        "mirror": 1114636288,
+        "mirrorneg": 1106247680,
+        "fetch0": -3,
+        "fetch5": 22,
+        "sread": 23,
+        "szero": 0,
+        "sclamp": 13,
+        "sclampy": 1,
+        "painted": 3064
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
