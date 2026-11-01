@@ -61,6 +61,8 @@ def _manifest_problems(manifest: dict) -> list[str]:
             continue
         if cid in seen:
             problems.append(f"{cid}: listed twice in the manifest")
+        if f"{cid}.json" == runner.ENVIRONMENT_FILE:
+            problems.append(f"{cid}: this id would share a file name with {runner.ENVIRONMENT_FILE}")
         seen.add(cid)
         want_source = f"corpus/{cid}/main.cu"
         if case.get("source") != want_source:
@@ -187,6 +189,10 @@ def cmd_self_check(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _shown(path: Path) -> Path:
+    return path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     table = cases_by_id()
     if args.case == "all":
@@ -214,17 +220,23 @@ def cmd_run(args: argparse.Namespace) -> int:
             print(conflict, file=sys.stderr)
             return 1
 
+    try:
+        environment = runner.write_environment(runner.describe_environment(args.toolchain, args.machine))
+    except ToolchainError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(f"machine {args.machine}: {_shown(environment.parent)}")
+
     counts: Counter[str] = Counter()
     for case in cases:
         try:
-            result, stdout = execute_case(case, args.toolchain, timeout=args.timeout)
+            result, stdout = execute_case(case, args.toolchain, args.machine, timeout=args.timeout)
         except ToolchainError as exc:
             print(str(exc), file=sys.stderr)
             return 1
         path = write_result(result)
         counts[result["status"]] += 1
-        shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
-        print(f"{result['status']:20} {result['case']:20} {shown}", flush=True)
+        print(f"{result['status']:20} {result['case']:20} {_shown(path)}", flush=True)
         if provenance is not None and result["status"] == "pass":
             write_gold(case["id"], stdout, provenance)
 
@@ -255,6 +267,12 @@ def _positive(text: str) -> int:
     return value
 
 
+def _machine(text: str) -> str:
+    if not re.fullmatch(runner.MACHINE_PATTERN, text):
+        raise argparse.ArgumentTypeError("use lowercase letters, digits, '.', '_', and '-', up to 64 characters")
+    return text
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="cuda-census")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -268,6 +286,12 @@ def main(argv: list[str] | None = None) -> int:
         type=_positive,
         default=DEFAULT_TIMEOUT,
         help=f"seconds allowed for each translate, compile, and run step (default {DEFAULT_TIMEOUT})",
+    )
+    run.add_argument(
+        "--machine",
+        type=_machine,
+        default=runner.default_machine(),
+        help="label for this machine; results go to results/<toolchain>/<machine>/ (default: the host name)",
     )
     run.add_argument("--write-gold", action="store_true", help="nvcc only: record passing stdout as gold")
     report = sub.add_parser("report", help="print results/ as one Markdown table")

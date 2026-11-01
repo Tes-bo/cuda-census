@@ -7,7 +7,10 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import platform
+import re
 import shutil
+import socket
 import subprocess
 import time
 from dataclasses import dataclass
@@ -26,6 +29,8 @@ from census.toolchains import (
 
 DEFAULT_TIMEOUT = 120
 PROVENANCE_FIELDS = ("toolchain", "nvcc", "gpu")
+MACHINE_PATTERN = r"[a-z0-9][a-z0-9._-]{0,63}"
+ENVIRONMENT_FILE = "environment.json"
 
 # Module attributes, read at call time, so tests can point them elsewhere.
 GOLD_DIR = ROOT / "gold"
@@ -45,6 +50,7 @@ STATUSES = (
 RESULT_KEYS = (
     "case",
     "toolchain",
+    "machine",
     "status",
     "argv",
     "returncode",
@@ -77,8 +83,22 @@ def provenance_path() -> Path:
     return GOLD_DIR / "provenance.json"
 
 
-def result_path(toolchain: str, case_id: str) -> Path:
-    return RESULTS_DIR / toolchain / f"{case_id}.json"
+def default_machine() -> str:
+    """The host name as a machine label, or "local" when it does not fit the label pattern."""
+    name = re.sub(r"[^a-z0-9._-]+", "-", socket.gethostname().lower()).strip("-._")[:64]
+    return name if re.fullmatch(MACHINE_PATTERN, name) else "local"
+
+
+def result_dir(toolchain: str, machine: str) -> Path:
+    return RESULTS_DIR / toolchain / machine
+
+
+def result_path(toolchain: str, machine: str, case_id: str) -> Path:
+    return result_dir(toolchain, machine) / f"{case_id}.json"
+
+
+def environment_path(toolchain: str, machine: str) -> Path:
+    return result_dir(toolchain, machine) / ENVIRONMENT_FILE
 
 
 def source_path(case: dict) -> Path:
@@ -116,6 +136,7 @@ def _result(**fields) -> dict:
     empty = {
         "case": "",
         "toolchain": "",
+        "machine": "",
         "status": "run-fail",
         "argv": [],
         "returncode": None,
@@ -202,7 +223,7 @@ def prepare_workdir(case: dict, toolchain: str, profile: dict) -> tuple[Path, di
     return work, slots, steps
 
 
-def execute_case(case: dict, toolchain: str, timeout: int = DEFAULT_TIMEOUT) -> tuple[dict, bytes]:
+def execute_case(case: dict, toolchain: str, machine: str, timeout: int = DEFAULT_TIMEOUT) -> tuple[dict, bytes]:
     """Build and run one case. Return the public result and the raw stdout of the binary."""
     started = time.monotonic()
     profiles = load_profiles()
@@ -215,6 +236,7 @@ def execute_case(case: dict, toolchain: str, timeout: int = DEFAULT_TIMEOUT) -> 
         return _result(
             case=case["id"],
             toolchain=toolchain,
+            machine=machine,
             source_sha256=source_sha256,
             seconds=time.monotonic() - started,
             **fields,
@@ -284,12 +306,56 @@ def execute_case(case: dict, toolchain: str, timeout: int = DEFAULT_TIMEOUT) -> 
     return result, proc.stdout
 
 
-def write_result(result: dict) -> Path:
-    dest = result_path(result["toolchain"], result["case"])
+def _write_json(dest: Path, data: dict) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
-    public = {key: result[key] for key in RESULT_KEYS}
-    dest.write_text(json.dumps(public, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    dest.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return dest
+
+
+def write_result(result: dict) -> Path:
+    public = {key: result[key] for key in RESULT_KEYS}
+    return _write_json(result_path(result["toolchain"], result["machine"], result["case"]), public)
+
+
+def _capture(argv: list[str]) -> str:
+    """Trimmed stdout of a short query command, or "" when the tool is absent or fails."""
+    path = which_allowed(argv[0])
+    if path is None:
+        return ""
+    proc = _run([path, *argv[1:]], ROOT, 60)
+    if proc.returncode != 0:
+        return ""
+    return proc.stdout.decode("utf-8", "replace").strip()[:2000]
+
+
+def describe_environment(toolchain: str, machine: str) -> dict:
+    """What a run used: the resolved tools, their version text, and the GPU, where the profile says how to ask."""
+    profile = load_profiles()[toolchain]
+    tools: dict[str, str | None] = {}
+    for key in ("translate", "compile"):
+        if key in profile:
+            name = profile[key][0]
+            found = which_allowed(name)
+            tools[name] = os.path.realpath(found) if found else None
+    return {
+        "toolchain": toolchain,
+        "machine": machine,
+        "tools": tools,
+        "version": _capture(profile["version"]) if "version" in profile else None,
+        "gpu": _capture(profile["gpu"]) if "gpu" in profile else None,
+        "platform": platform.platform(),
+    }
+
+
+def write_environment(environment: dict) -> Path:
+    return _write_json(environment_path(environment["toolchain"], environment["machine"]), environment)
+
+
+def load_environment(toolchain: str, machine: str) -> dict | None:
+    path = environment_path(toolchain, machine)
+    if not path.is_file():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_provenance() -> dict | None:

@@ -34,9 +34,11 @@ python3 -m census report
 
 `run` exits 0 when every selected case is `pass`. It exits 2 when the only failures are missing tools. Any compile, run, or numeric failure exits 1. `--case <id>` runs one case. `--timeout <seconds>` limits each translate, compile, and run step (default 120).
 
-Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<case>.json`, which follows `schema/result.schema.json`. Paths inside the checkout are written relative to it. `results/` is not committed.
+Each case prints `name=integer` lines and nothing else. The runner writes `results/<toolchain>/<machine>/<case>.json`, which follows `schema/result.schema.json`. Paths inside the checkout are written relative to it. `results/` is not committed.
 
-`report` prints `results/` as one Markdown table with a column per toolchain, then lists every mismatched key. Each result records the SHA-256 of the case source and of the gold it was compared with. A cell is marked `(stale)` when either file changed after the run, and stale cells are not counted as passes. `--toolchain` picks columns. `--output` writes the table to a file.
+`--machine <label>` names the machine directory. It defaults to the host name. Use a label that says what the hardware is, for example `--machine hygon-k100`, so results from an AMD machine and a Hygon machine that both run `hipify` stay apart. Each run also writes `environment.json` in that directory: the resolved path of every tool, the platform, and the output of the profile's `version` and `gpu` commands.
+
+`report` prints `results/` as one Markdown table with a column per toolchain and machine, then lists every mismatched key and the GPU and tool version of each column. Each result records the SHA-256 of the case source and of the gold it was compared with. A cell is marked `(stale)` when either file changed after the run, and stale cells are not counted as passes. `--toolchain` picks columns. `--output` writes the table to a file.
 
 `self-check` needs no GPU. It checks that every corpus directory, manifest entry, gold file, and `gold/provenance.json` entry agree, that `toolchains.json` only uses known keys and slots, that the schema matches the runner, and that the corpus table below and `docs/overview.svg` show the manifest's cases and integers.
 
@@ -163,6 +165,8 @@ The runner tests put small Python stand-ins for `nvcc`, `hipify-perl`, `hipcc`, 
 | `cu-bridge` | no rewrite. `cucc` compiles the original `.cu` |
 
 Override a binary by putting the official tool on `PATH`. A tool whose path, or symlink target, contains `cuda-retarget` is refused.
+
+A profile may also name a `version` command and a `gpu` command, which only feed `environment.json`. `nvcc` uses `nvcc --version` and `nvidia-smi`. `hipify` uses `hipcc --version` and `rocm-smi --showproductname`. `musify` and `cu-bridge` have neither yet, because their query flags are not confirmed. A missing or failing query is recorded as an empty string and does not affect any case.
 
 ## Adding a case
 

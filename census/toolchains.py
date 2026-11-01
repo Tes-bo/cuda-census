@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 GOLD_TOOLCHAIN = "nvcc"
 FORBIDDEN_NAMES = ("cuda-retarget", "retarget")
 SLOTS = ("source", "binary", "translated", "copied_source")
-PROFILE_KEYS = ("role", "compile", "translate", "translate_stdout", "copy_source_to")
+PROFILE_KEYS = ("role", "compile", "translate", "translate_stdout", "copy_source_to", "version", "gpu")
+COMMAND_KEYS = ("compile", "translate", "version", "gpu")
 _SLOT = re.compile(r"\{([A-Za-z_]+)\}")
 
 
@@ -89,7 +90,7 @@ def profile_problems(profiles: dict) -> list[str]:
         if "translate_stdout" in profile and "translate" not in profile:
             problems.append(f"{where}: translate_stdout without translate")
         templates: list[str] = []
-        for key in ("compile", "translate"):
+        for key in COMMAND_KEYS:
             if key not in profile:
                 continue
             argv = profile[key]

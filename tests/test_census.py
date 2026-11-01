@@ -42,6 +42,9 @@ sys.exit(int(os.environ.get("FAKE_RC", "0")))
 
 FAKE_COMPILER = f"""#!{PY}
 import os, sys
+if sys.argv[1:] == ["--version"]:
+    print("fake compiler driver\\nfake compilation tools, release 1.2, V1.2.3")
+    sys.exit(0)
 if os.environ.get("FAKE_COMPILE_FAIL"):
     sys.stderr.write("fake: error: no such intrinsic\\n")
     sys.exit(1)
@@ -62,7 +65,12 @@ with open(sys.argv[-1], "a") as f:
     f.write("// musified\\n")
 """
 
+FAKE_SMI = f"""#!{PY}
+print("Fake GPU 0\\nFake GPU 1")
+"""
+
 FAKE_TOOLS = {
+    "nvidia-smi": FAKE_SMI,
     "nvcc": FAKE_COMPILER,
     "hipcc": FAKE_COMPILER,
     "mcc": FAKE_COMPILER,
@@ -186,7 +194,8 @@ class _Sandbox(unittest.TestCase):
         os.environ["FAKE_STDOUT_HEX"] = stdout.hex()
         for key, value in env.items():
             os.environ[f"FAKE_{key.upper()}"] = str(value)
-        result, raw = execute_case(self.case, toolchain, timeout=timeout)
+        result, raw = execute_case(self.case, toolchain, "m1", timeout=timeout)
+        self.assertEqual(result["machine"], "m1")
         self.assertEqual(list(result), list(RESULT_KEYS))
         if result["status"] not in ("compile-fail", "toolchain-missing") and result["returncode"] is not None:
             self.assertEqual(raw, stdout)
@@ -314,6 +323,44 @@ class CliTests(_Sandbox):
         self.assertEqual(code, 2)
         self.assertIn("unknown case nope", err)
 
+    def test_machine_label_is_validated(self) -> None:
+        for bad in ("../up", "Upper", "", "a" * 65):
+            with self.assertRaises(SystemExit):
+                self.call("run", "--toolchain", "nvcc", "--machine", bad)
+
+    def test_run_writes_results_and_environment_under_the_machine(self) -> None:
+        cid = load_manifest()["cases"][0]["id"]
+        code, out, _ = self.call("run", "--toolchain", "hipify", "--case", cid, "--machine", "box-1")
+        self.assertEqual(code, 1)  # the stand-in prints nothing, so the stdout is unparsed
+        self.assertIn("machine box-1:", out)
+        result = json.loads(runner.result_path("hipify", "box-1", cid).read_text(encoding="utf-8"))
+        self.assertEqual(result["machine"], "box-1")
+        env = runner.load_environment("hipify", "box-1")
+        self.assertEqual(sorted(env["tools"]), ["hipcc", "hipify-perl"])
+        self.assertEqual(env["tools"]["hipcc"], os.path.realpath(self.bin / "hipcc"))
+        self.assertIn("release 1.2", env["version"])
+        self.assertEqual(env["gpu"], "")  # rocm-smi is not on PATH
+
+
+class EnvironmentTests(_Sandbox):
+    def test_version_and_gpu_come_from_the_profile(self) -> None:
+        env = runner.describe_environment("nvcc", "m1")
+        self.assertEqual(env["version"], "fake compiler driver\nfake compilation tools, release 1.2, V1.2.3")
+        self.assertEqual(env["gpu"], "Fake GPU 0\nFake GPU 1")
+        self.assertEqual(env["tools"], {"nvcc": os.path.realpath(self.bin / "nvcc")})
+
+    def test_a_profile_without_queries_records_none(self) -> None:
+        env = runner.describe_environment("cu-bridge", "m1")
+        self.assertIsNone(env["version"])
+        self.assertIsNone(env["gpu"])
+        self.assertEqual(env["tools"], {"cucc": os.path.realpath(self.bin / "cucc")})
+
+    def test_missing_tools_are_none(self) -> None:
+        os.environ["PATH"] = str(self.tmp / "empty")
+        env = runner.describe_environment("nvcc", "m1")
+        self.assertEqual(env["tools"], {"nvcc": None})
+        self.assertEqual((env["version"], env["gpu"]), ("", ""))
+
 
 class DocsTests(unittest.TestCase):
     def test_docs_drift_is_reported(self) -> None:
@@ -341,10 +388,11 @@ class ReportTests(unittest.TestCase):
         self.addCleanup(patcher.stop)
         self.cases = load_manifest()["cases"]
 
-    def put(self, toolchain: str, case: dict, **fields) -> None:
+    def put(self, toolchain: str, case: dict, machine: str = "m1", **fields) -> None:
         current = {
             "case": case["id"],
             "toolchain": toolchain,
+            "machine": machine,
             "source_sha256": runner.file_sha256(runner.source_path(case)),
             "gold_sha256": runner.file_sha256(runner.gold_path(case["id"])),
         }
@@ -355,15 +403,30 @@ class ReportTests(unittest.TestCase):
         self.put("nvcc", first, status="pass")
         self.put("hipify", first, status="numeric-mismatch", diffs={"sum": -1, "x": None})
         self.put("hipify", second, status="pass", source_sha256="0" * 64)
-        text = build_report(["nvcc", "hipify"])
+        text = build_report(["nvcc", "hipify", "musify"])
         lines = text.splitlines()
-        self.assertEqual(lines[0], "| Case | `nvcc` | `hipify` |")
-        self.assertIn(f"| `{first['id']}` | pass | numeric-mismatch (2) |", lines)
-        self.assertIn(f"| `{second['id']}` | not run | pass (stale) |", lines)
-        self.assertIn(f"| `{third['id']}` | not run | not run |", lines)
-        self.assertIn(f"| **pass** | 1/{len(self.cases)} | 0/{len(self.cases)} |", lines)
+        self.assertEqual(lines[0], "| Case | `nvcc` (m1) | `hipify` (m1) | `musify` |")
+        self.assertIn(f"| `{first['id']}` | pass | numeric-mismatch (2) | not run |", lines)
+        self.assertIn(f"| `{second['id']}` | not run | pass (stale) | not run |", lines)
+        self.assertIn(f"| `{third['id']}` | not run | not run | not run |", lines)
+        n = len(self.cases)
+        self.assertIn(f"| **pass** | 1/{n} | 0/{n} | 0/{n} |", lines)
         self.assertIn("`sum` -1, `x` printed by one side only", text)
-        self.assertIn(f"`hipify` `{second['id']}` is stale: source changed.", text)
+        self.assertIn(f"`hipify` (m1) `{second['id']}` is stale: source changed.", text)
+
+    def test_each_machine_is_a_column_with_its_environment(self) -> None:
+        first = self.cases[0]
+        self.put("hipify", first, machine="amd-mi250", status="pass")
+        self.put("hipify", first, machine="hygon-k100", status="run-fail")
+        runner.write_environment(
+            {"toolchain": "hipify", "machine": "amd-mi250", "gpu": "AMD Instinct MI250X\nAMD Instinct MI250X",
+             "version": "HIP version: 6.2.41133-dd7f95766\nAMD clang version 18.0.0", "tools": {}}
+        )
+        lines = build_report(["hipify"]).splitlines()
+        self.assertEqual(lines[0], "| Case | `hipify` (amd-mi250) | `hipify` (hygon-k100) |")
+        self.assertIn(f"| `{first['id']}` | pass | run-fail |", lines)
+        self.assertIn("| `hipify` (amd-mi250) | AMD Instinct MI250X | HIP version: 6.2.41133-dd7f95766 |", lines)
+        self.assertIn("| `hipify` (hygon-k100) | - | - |", lines)
 
 
 if __name__ == "__main__":
