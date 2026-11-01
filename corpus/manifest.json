@@ -1145,6 +1145,19 @@
       }
     },
     {
+      "id": "device_assert",
+      "source": "corpus/device_assert/main.cu",
+      "expect": {
+        "held": 1,
+        "launched": 1,
+        "assert": 1,
+        "last": 1,
+        "cleared": 1,
+        "alloc": 1,
+        "resync": 1
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
