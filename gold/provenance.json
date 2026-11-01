@@ -56,6 +56,7 @@
     "saturatef",
     "scale",
     "shared_atomic",
+    "shfl_width",
     "sqrt",
     "stream_order",
     "symbols",

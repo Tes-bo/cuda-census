@@ -1109,6 +1109,26 @@
       }
     },
     {
+      "id": "shfl_width",
+      "source": "corpus/shfl_width/main.cu",
+      "expect": {
+        "idx8": 238368,
+        "idx8wrap": 282400,
+        "up16": 175890,
+        "down8": 294700,
+        "xor8": 157888,
+        "up1": 235663,
+        "down64": 56212532305344,
+        "xor8l3": 10,
+        "xor8l11": 10,
+        "xor8l19": 362,
+        "xor8l27": 362,
+        "active0": 4294967295,
+        "active32": 255,
+        "part": 9256
+      }
+    },
+    {
       "id": "graph_replay",
       "source": "corpus/graph_replay/main.cu",
       "expect": {"sum": 32}
