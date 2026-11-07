@@ -16,6 +16,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -263,6 +264,25 @@ class RunnerTests(_Sandbox):
         self.assertEqual(result["status"], "run-fail")
         self.assertIsNone(result["returncode"])
         self.assertIn("timed out after 1 s", result["stderr_tail"])
+
+    def test_timeout_stops_what_the_step_started(self) -> None:
+        # A driver such as hipcc that starts the real compiler, which hangs.
+        pid_file = self.tmp / "grandchild.pid"
+        driver = _write_tool(
+            self.tmp,
+            "driver",
+            f"#!{PY}\nimport subprocess, sys, time\n"
+            "child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(30)'])\n"
+            f"open({str(pid_file)!r}, 'w').write(str(child.pid))\n"
+            "time.sleep(30)\n",
+        )
+        proc = runner._run([str(driver)], self.tmp, 1)
+        self.assertIn("timed out after 1 s", proc.error)
+        grandchild = int(pid_file.read_text())
+        with self.assertRaises(ProcessLookupError):
+            for _ in range(50):
+                os.kill(grandchild, 0)
+                time.sleep(0.1)
 
     def test_compile_fail(self) -> None:
         result = self.run_case(compile_fail=1)

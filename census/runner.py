@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import shutil
+import signal
 import socket
 import subprocess
 import time
@@ -215,22 +216,43 @@ class _Proc:
         return _tail(_portable("\n".join(part for part in parts if part)))
 
 
-def _run(argv: list[str], cwd: Path, timeout: int) -> _Proc:
+def _kill_group(proc: subprocess.Popen) -> None:
     try:
-        proc = subprocess.run(
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+
+def _run(argv: list[str], cwd: Path, timeout: int) -> _Proc:
+    # hipcc and nvcc are drivers that start clang, cicc, and ptxas. Each step
+    # gets its own process group, so a timeout stops those as well.
+    try:
+        proc = subprocess.Popen(
             argv,
             cwd=cwd,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=timeout,
-            check=False,
+            start_new_session=True,
         )
-    except subprocess.TimeoutExpired as exc:
-        return _Proc(None, exc.stdout or b"", exc.stderr or b"", f"timed out after {timeout} s")
     except OSError as exc:
         return _Proc(None, b"", b"", f"could not start {argv[0]}: {exc}")
-    return _Proc(proc.returncode, proc.stdout, proc.stderr)
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _kill_group(proc)
+        try:
+            stdout, stderr = proc.communicate(timeout=10)
+        except subprocess.TimeoutExpired as exc:
+            # Something left the group and still holds the pipes.
+            stdout, stderr = exc.stdout or b"", exc.stderr or b""
+        return _Proc(None, stdout, stderr, f"timed out after {timeout} s")
+    except BaseException:
+        # In its own session the step does not see the terminal's Ctrl-C.
+        _kill_group(proc)
+        proc.wait()
+        raise
+    return _Proc(proc.returncode, stdout, stderr)
 
 
 @dataclass
